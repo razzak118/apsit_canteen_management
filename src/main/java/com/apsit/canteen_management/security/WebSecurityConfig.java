@@ -1,15 +1,24 @@
 package com.apsit.canteen_management.security;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.io.IOException;
+
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class WebSecurityConfig {
@@ -25,7 +34,12 @@ public class WebSecurityConfig {
                         //.requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .oauth2Login(oauth-> oauth.failureHandler(
+                        (request, response, exception) -> {
+                            log.error("OAuth2 error {}" , exception.getMessage());
+                        }
+                ));
                 //.formLogin(Customizer.withDefaults()); we don't need the default security form anymore. we'll be creating our own.
         return httpSecurity.build();
     }

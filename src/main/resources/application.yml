@@ -1,0 +1,9 @@
+spring:
+  security.oauth2.client:
+    registration:
+      google:
+        client-id: jdkla
+        client-secret: hjdfhj
+      github:
+        client-id: dhskd
+        client-secret: jhdjash
