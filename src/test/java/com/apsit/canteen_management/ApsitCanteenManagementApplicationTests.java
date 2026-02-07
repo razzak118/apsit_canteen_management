@@ -1,0 +1,13 @@
+package com.apsit.canteen_management;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class ApsitCanteenManagementApplicationTests {
+
+	@Test
+	void contextLoads() {
+	}
+
+}
