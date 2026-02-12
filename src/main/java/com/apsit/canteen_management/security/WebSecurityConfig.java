@@ -34,12 +34,7 @@ public class WebSecurityConfig {
                         //.requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .oauth2Login(oauth-> oauth.failureHandler(
-                        (request, response, exception) -> {
-                            log.error("OAuth2 error {}" , exception.getMessage());
-                        }
-                ));
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
                 //.formLogin(Customizer.withDefaults()); we don't need the default security form anymore. we'll be creating our own.
         return httpSecurity.build();
     }
