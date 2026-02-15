@@ -4,6 +4,7 @@ import com.apsit.canteen_management.dto.LoginRequestDto;
 import com.apsit.canteen_management.dto.LoginResponseDto;
 import com.apsit.canteen_management.dto.SignupRequestDto;
 import com.apsit.canteen_management.dto.SignupResponseDto;
+import com.apsit.canteen_management.entity.Cart;
 import com.apsit.canteen_management.entity.User;
 import com.apsit.canteen_management.repository.UserRepository;
 import com.apsit.canteen_management.security.AuthUtil;
@@ -36,13 +37,16 @@ public class AuthService {
     public SignupResponseDto signup(SignupRequestDto signupRequestDto) {
         User user = userRepository.findByUsername(signupRequestDto.getUsername()).orElse(null);
         if (user != null) throw new IllegalArgumentException("User already exist ! \n Try with different username.");
-        user = userRepository.save(User.builder()
+        user = User.builder()
                 .username(signupRequestDto.getUsername())
                 .password(passwordEncoder.encode(signupRequestDto.getPassword()))
                 .email(signupRequestDto.getUsername() + "@apsit.edu.in")
                 .mobileNumber(signupRequestDto.getMobileNumber())
-                .build()
-        );
+                .build();
+        Cart cart= new Cart();
+        cart.setUser(user);
+        user.setCart(cart);
+        userRepository.save(user);
         return new SignupResponseDto(user.getUserId(), user.getUsername());
     }
 }

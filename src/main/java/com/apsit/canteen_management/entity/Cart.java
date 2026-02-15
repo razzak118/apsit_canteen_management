@@ -1,14 +1,20 @@
 package com.apsit.canteen_management.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.util.List;
 
 @Entity
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Cart {
     @Id
     @Column(name = "user_id")
-    private Long userId;
+    private Long cartId;
     @OneToOne
     @MapsId
     @JoinColumn(name = "user_id")

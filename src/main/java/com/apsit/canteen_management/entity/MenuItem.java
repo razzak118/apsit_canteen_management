@@ -2,19 +2,19 @@ package com.apsit.canteen_management.entity;
 
 import com.apsit.canteen_management.enums.ItemCategory;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Getter
+@Setter
+@Builder
 public class MenuItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long itemId;
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String itemName;
     @Column(nullable = false)
     private int price;
