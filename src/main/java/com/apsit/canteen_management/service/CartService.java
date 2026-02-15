@@ -8,13 +8,10 @@ import com.apsit.canteen_management.entity.User;
 import com.apsit.canteen_management.repository.CartRepository;
 import com.apsit.canteen_management.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -71,5 +68,4 @@ public class CartService {
         }
         return ResponseEntity.ok(modelMapper.map(cartRepository.save(prevCart), CartDto.class));
     }
-
 }

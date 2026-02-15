@@ -2,6 +2,10 @@ package com.apsit.canteen_management.entity;
 
 import com.apsit.canteen_management.enums.OrderStatus;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -9,14 +13,18 @@ import java.util.List;
 
 
 @Entity
-public class Order {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class OrderTicket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String username;
+    @OneToMany(mappedBy = "orderTicket")
     @Column(nullable = false)
-    @OneToMany
-    private List<MenuItem> menuItems;
+    private List<OrderItem> orderItems;
     @Column(nullable=false)
     private double totalAmount;
     @Enumerated(EnumType.STRING)
