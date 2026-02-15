@@ -17,7 +17,7 @@ public class MenuItem {
     @Column(nullable = false, unique = true)
     private String itemName;
     @Column(nullable = false)
-    private int price;
+    private Double price;
     @Column(nullable = false)
     private String imageUrl;
     @Column(nullable = false)
