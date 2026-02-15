@@ -20,7 +20,7 @@ import java.util.List;
 public class Admin implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    private Long adminId;
     private String username;
     private String password;
     private String email;

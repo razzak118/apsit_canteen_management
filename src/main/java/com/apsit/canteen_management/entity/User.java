@@ -27,6 +27,8 @@ public class User implements UserDetails {
     private String email;
     private String mobileNumber;
     private String password;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Cart cart;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

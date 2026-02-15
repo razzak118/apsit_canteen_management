@@ -1,7 +1,7 @@
 package com.apsit.canteen_management.controller;
 
 import com.apsit.canteen_management.dto.ItemDto;
-import com.apsit.canteen_management.entity.Item;
+import com.apsit.canteen_management.entity.MenuItem;
 import com.apsit.canteen_management.enums.ItemCategory;
 import com.apsit.canteen_management.service.ItemService;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +18,8 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping()
-    public ResponseEntity<Item> saveItem(@RequestBody Item item){
-        return itemService.saveItem(item);
+    public ResponseEntity<MenuItem> saveItem(@RequestBody MenuItem menuItem){
+        return itemService.saveItem(menuItem);
     }
 
     @DeleteMapping("/delete/{id}")
