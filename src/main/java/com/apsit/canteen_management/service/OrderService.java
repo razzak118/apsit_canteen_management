@@ -13,6 +13,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,6 +25,7 @@ public class OrderService {
     private final CartRepository cartRepository;
     private final ModelMapper modelMapper;
 
+    @Transactional
     public ResponseEntity<OrderTicketDto> placeOrder(){
         User user =(User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Cart cart=cartRepository.findById(user.getUserId()).orElseThrow();

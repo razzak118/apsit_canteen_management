@@ -6,6 +6,7 @@ import com.apsit.canteen_management.dto.SignupRequestDto;
 import com.apsit.canteen_management.dto.SignupResponseDto;
 import com.apsit.canteen_management.entity.Cart;
 import com.apsit.canteen_management.entity.User;
+import com.apsit.canteen_management.enums.Role;
 import com.apsit.canteen_management.repository.UserRepository;
 import com.apsit.canteen_management.security.AuthUtil;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +36,7 @@ public class AuthService {
         return new LoginResponseDto(authUtil.generateToken(user), user.getUserId());
     }
 
+    @Transactional
     public SignupResponseDto signup(SignupRequestDto signupRequestDto) {
         User user = userRepository.findByUsername(signupRequestDto.getUsername()).orElse(null);
         if (user != null) throw new IllegalArgumentException("User already exist ! \n Try with different username.");
@@ -42,6 +45,7 @@ public class AuthService {
                 .password(passwordEncoder.encode(signupRequestDto.getPassword()))
                 .email(signupRequestDto.getUsername() + "@apsit.edu.in")
                 .mobileNumber(signupRequestDto.getMobileNumber())
+                .role(Role.valueOf(signupRequestDto.getRole()))
                 .build();
         Cart cart= new Cart();
         cart.setUser(user);

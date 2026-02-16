@@ -22,7 +22,7 @@ public class OrderTicket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String username;
-    @OneToMany(mappedBy = "orderTicket")
+    @OneToMany(mappedBy = "orderTicket", cascade = CascadeType.ALL, orphanRemoval = true)
     @Column(nullable = false)
     private List<OrderItem> orderItems;
     @Column(nullable=false)

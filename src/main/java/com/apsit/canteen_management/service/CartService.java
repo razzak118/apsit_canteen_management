@@ -12,6 +12,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +28,7 @@ public class CartService {
                 .map(ResponseEntity::ok)
                 .orElseGet(()->ResponseEntity.notFound().build());
     }
-
+    @Transactional
     public ResponseEntity<CartDto> addItemToCart(Long itemId){
         User user= (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Cart prevCart=cartRepository.findById(user.getUserId()).orElseThrow();
@@ -52,7 +53,7 @@ public class CartService {
         prevCart.setTotalCartPrice(cartCurrentTotal+menuItem.getPrice());
         return ResponseEntity.ok(modelMapper.map(cartRepository.save(prevCart), CartDto.class));
     }
-
+    @Transactional
     public ResponseEntity<CartDto> removeItemFromCart(Long itemId){
         User user= (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Cart prevCart=cartRepository.findById(user.getUserId()).orElseThrow();
@@ -62,6 +63,9 @@ public class CartService {
             if(cartItem.getMenuItem().getItemId().equals(menuItem.getItemId())){
                 prevCart.setTotalCartPrice(cartCurrentTotal-menuItem.getPrice());
                 cartItem.setQuantity(cartItem.getQuantity()-1);
+                if(cartItem.getQuantity()==0){
+                    prevCart.getCartItems().remove(cartItem);
+                }
                 cartItem.setCartItemPrice(cartItem.getCartItemPrice()-menuItem.getPrice());
                 break;
             }

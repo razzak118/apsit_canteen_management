@@ -6,6 +6,8 @@ import com.apsit.canteen_management.enums.ItemCategory;
 import com.apsit.canteen_management.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,12 +19,14 @@ public class ItemController {
 
     private final ItemService itemService;
 
-    @PostMapping()
+    @PostMapping("/save")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MenuItem> saveItem(@RequestBody MenuItem menuItem){
         return itemService.saveItem(menuItem);
     }
 
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity deleteItemById(@PathVariable Long id){
         return itemService.deleteItem(id);
     }
@@ -38,6 +42,7 @@ public class ItemController {
     }
 
     @PatchMapping("/{id}/toggleAvailability")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ItemDto> toggleAvailability(@PathVariable Long id){
         return itemService.toggleAvailability(id);
     }
