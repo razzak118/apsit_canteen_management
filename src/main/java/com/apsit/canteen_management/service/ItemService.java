@@ -1,24 +1,40 @@
 package com.apsit.canteen_management.service;
 
 import com.apsit.canteen_management.dto.ItemDto;
+import com.apsit.canteen_management.dto.SaveItemDto;
 import com.apsit.canteen_management.entity.MenuItem;
 import com.apsit.canteen_management.enums.ItemCategory;
 import com.apsit.canteen_management.repository.ItemRepository;
+import com.cloudinary.Cloudinary;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class ItemService {
     private final ItemRepository itemRepository;
     private final ModelMapper modelMapper;
+    private final CloudinaryServiceImpl cloudinaryService;
 
-    public ResponseEntity<MenuItem> saveItem(MenuItem menuItem){
-        return ResponseEntity.ok(itemRepository.save(menuItem));
+    @Transactional
+    public ResponseEntity<MenuItem> saveItem(SaveItemDto saveItemDto){
+        MenuItem newMenuItem= MenuItem.builder()
+                .itemName(saveItemDto.getItemName())
+                .price(saveItemDto.getPrice())
+                .category(ItemCategory.valueOf(saveItemDto.getCategory().toString().toUpperCase()))
+                .isAvailable(true)
+                .build();
+        MultipartFile itemImage=saveItemDto.getItemImage();
+        Map uploadInfo= cloudinaryService.upload(itemImage);
+        newMenuItem.setImageUrl(uploadInfo.get("url").toString());
+        return ResponseEntity.ok(itemRepository.save(newMenuItem));
     }
 
     public ResponseEntity deleteItem(Long id){

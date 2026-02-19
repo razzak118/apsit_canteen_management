@@ -1,14 +1,17 @@
 package com.apsit.canteen_management.controller;
 
 import com.apsit.canteen_management.dto.ItemDto;
+import com.apsit.canteen_management.dto.SaveItemDto;
 import com.apsit.canteen_management.entity.MenuItem;
 import com.apsit.canteen_management.enums.ItemCategory;
 import com.apsit.canteen_management.service.ItemService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -19,10 +22,11 @@ public class ItemController {
 
     private final ItemService itemService;
 
-    @PostMapping("/save")
+    @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<MenuItem> saveItem(@RequestBody MenuItem menuItem){
-        return itemService.saveItem(menuItem);
+    // Instead of using @ModelAttribute we can manually use @RequestParam for each parameter in the request
+    public ResponseEntity<MenuItem> saveItem(@ModelAttribute SaveItemDto saveItemDto) {
+        return itemService.saveItem(saveItemDto);
     }
 
     @DeleteMapping("/delete/{id}")
