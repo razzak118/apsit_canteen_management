@@ -28,6 +28,10 @@ public class ItemController {
     public ResponseEntity<MenuItem> saveItem(@ModelAttribute SaveItemDto saveItemDto) {
         return itemService.saveItem(saveItemDto);
     }
+    @GetMapping
+    public List<ItemDto> getAllItem(){
+        return itemService.getAllItem();
+    }
 
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('ADMIN')")

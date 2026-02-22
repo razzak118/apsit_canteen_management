@@ -72,4 +72,11 @@ public class CartService {
         }
         return ResponseEntity.ok(modelMapper.map(cartRepository.save(prevCart), CartDto.class));
     }
+
+    public ResponseEntity<CartDto> removeItemCompletelyFromCart(Long itemId) {
+        User user= (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Cart cart=cartRepository.findById(user.getUserId()).orElseThrow();
+        cart.getCartItems().removeIf(cartItem -> cartItem.getCartItemId().equals(itemId));
+        return ResponseEntity.ok(modelMapper.map(cartRepository.save(cart), CartDto.class));
+    }
 }

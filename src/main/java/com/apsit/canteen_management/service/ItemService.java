@@ -80,4 +80,10 @@ public class ItemService {
                 .orElseGet(()->ResponseEntity.notFound().build());
     }
 
+    public List<ItemDto> getAllItem() {
+        return itemRepository.findAll()
+                .stream().map(item-> modelMapper.map(item, ItemDto.class))
+                .toList();
+
+    }
 }

@@ -26,4 +26,7 @@ public class CartController {
         return cartService.removeItemFromCart(itemId);
     }
 
+    public ResponseEntity<CartDto> removeItemCompletelyFromCart(@PathVariable Long itemId){
+        return cartService.removeItemCompletelyFromCart(itemId);
+    }
 }

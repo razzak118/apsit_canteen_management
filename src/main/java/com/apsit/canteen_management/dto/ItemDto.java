@@ -7,6 +7,7 @@ import org.hibernate.annotations.EmbeddedTable;
 @Data
 public class ItemDto {
 
+    private Long itemId;
     private String itemName;
     private int price;
     private String imageUrl;
