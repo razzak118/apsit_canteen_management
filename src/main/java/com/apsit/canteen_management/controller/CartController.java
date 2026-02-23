@@ -16,7 +16,7 @@ public class CartController {
         return cartService.getCartById();
     }
 
-    @PostMapping("/add/{itemId}")
+    @PostMapping("/addToCart/{itemId}")
     public ResponseEntity<CartDto> addItemToCart(@PathVariable Long itemId){
         return cartService.addItemToCart(itemId);
     }
@@ -26,6 +26,7 @@ public class CartController {
         return cartService.removeItemFromCart(itemId);
     }
 
+    @PostMapping("/deleteItemfromCart/{itemId}")
     public ResponseEntity<CartDto> removeItemCompletelyFromCart(@PathVariable Long itemId){
         return cartService.removeItemCompletelyFromCart(itemId);
     }

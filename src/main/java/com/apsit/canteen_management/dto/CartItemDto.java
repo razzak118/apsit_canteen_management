@@ -8,6 +8,6 @@ import lombok.*;
 public class CartItemDto {
     private Long cartItemId;
     private Double cartItemPrice;
-    private Integer Quantity;
+    private Integer quantity;
     private ItemDto menuItem;
 }

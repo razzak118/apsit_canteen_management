@@ -14,6 +14,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Iterator;
+
 @Service
 @RequiredArgsConstructor
 public class CartService {
@@ -34,7 +36,9 @@ public class CartService {
         Cart prevCart=cartRepository.findById(user.getUserId()).orElseThrow();
         MenuItem menuItem= itemRepository.findById(itemId).orElseThrow();
         double cartCurrentTotal= prevCart.getTotalCartPrice()==null? 0.0 : prevCart.getTotalCartPrice();
-        for(CartItem cartItem: prevCart.getCartItems()){
+        Iterator<CartItem> iterator=prevCart.getCartItems().iterator();
+        while(iterator.hasNext()){
+            CartItem cartItem=iterator.next();
             if(cartItem.getMenuItem().getItemId().equals(menuItem.getItemId())){
                 cartItem.setQuantity(cartItem.getQuantity()+1);
                 cartItem.setCartItemPrice(cartItem.getCartItemPrice()+menuItem.getPrice());
@@ -42,6 +46,7 @@ public class CartService {
                 return ResponseEntity.ok(modelMapper.map(cartRepository.save(prevCart), CartDto.class));
             }
         }
+
         CartItem cartItem=CartItem.builder()
                 .cartItemPrice(menuItem.getPrice())
                 .cart(prevCart)
@@ -59,12 +64,14 @@ public class CartService {
         Cart prevCart=cartRepository.findById(user.getUserId()).orElseThrow();
         MenuItem menuItem= itemRepository.findById(itemId).orElseThrow();
         double cartCurrentTotal= prevCart.getTotalCartPrice()==null? 0.0 : prevCart.getTotalCartPrice();
-        for(CartItem cartItem: prevCart.getCartItems()){
+        Iterator<CartItem> iterator=prevCart.getCartItems().iterator();
+        while(iterator.hasNext()){
+            CartItem cartItem=iterator.next();
             if(cartItem.getMenuItem().getItemId().equals(menuItem.getItemId())){
                 prevCart.setTotalCartPrice(cartCurrentTotal-menuItem.getPrice());
                 cartItem.setQuantity(cartItem.getQuantity()-1);
                 if(cartItem.getQuantity()==0){
-                    prevCart.getCartItems().remove(cartItem);
+                    iterator.remove();
                 }
                 cartItem.setCartItemPrice(cartItem.getCartItemPrice()-menuItem.getPrice());
                 break;
@@ -73,10 +80,18 @@ public class CartService {
         return ResponseEntity.ok(modelMapper.map(cartRepository.save(prevCart), CartDto.class));
     }
 
-    public ResponseEntity<CartDto> removeItemCompletelyFromCart(Long itemId) {
+    public ResponseEntity<CartDto> removeItemCompletelyFromCart(Long cartItemId) {
         User user= (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Cart cart=cartRepository.findById(user.getUserId()).orElseThrow();
-        cart.getCartItems().removeIf(cartItem -> cartItem.getCartItemId().equals(itemId));
-        return ResponseEntity.ok(modelMapper.map(cartRepository.save(cart), CartDto.class));
+        Cart prevcart=cartRepository.findById(user.getUserId()).orElseThrow();
+        Double currentCartPrice=prevcart.getTotalCartPrice();
+        prevcart.getCartItems().stream()
+                .filter(cartItem -> cartItem.getCartItemId().equals(cartItemId))
+                .findFirst()
+                .ifPresent(itemToRemove->{
+                    prevcart.setTotalCartPrice(currentCartPrice-itemToRemove.getCartItemPrice());
+                    prevcart.getCartItems().remove(itemToRemove);
+                });
+        return ResponseEntity.ok(modelMapper.map(cartRepository.save(prevcart), CartDto.class));
+
     }
 }
