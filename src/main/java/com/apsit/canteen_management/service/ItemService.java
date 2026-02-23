@@ -36,7 +36,12 @@ public class ItemService {
         newMenuItem.setImageUrl(uploadInfo.get("url").toString());
         return ResponseEntity.ok(itemRepository.save(newMenuItem));
     }
-
+    public ResponseEntity<List<MenuItem>> saveListOfItem(List<MenuItem> menuItems) {
+        List<MenuItem> menuItemList = menuItems.stream()
+                .map(itemRepository::save)
+                .toList();
+        return ResponseEntity.ok(menuItemList);
+    }
     public ResponseEntity deleteItem(Long id){
         try{
             itemRepository.deleteById(id);
@@ -84,6 +89,5 @@ public class ItemService {
         return itemRepository.findAll()
                 .stream().map(item-> modelMapper.map(item, ItemDto.class))
                 .toList();
-
     }
 }

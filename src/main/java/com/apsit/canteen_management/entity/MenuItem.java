@@ -3,6 +3,7 @@ package com.apsit.canteen_management.entity;
 import com.apsit.canteen_management.enums.ItemCategory;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Entity
 @NoArgsConstructor

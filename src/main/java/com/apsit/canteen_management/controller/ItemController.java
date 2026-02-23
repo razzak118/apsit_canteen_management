@@ -28,6 +28,10 @@ public class ItemController {
     public ResponseEntity<MenuItem> saveItem(@ModelAttribute SaveItemDto saveItemDto) {
         return itemService.saveItem(saveItemDto);
     }
+    @PostMapping("/save/all")
+    public ResponseEntity<List<MenuItem>> saveListOfItem(@RequestBody List<MenuItem> menuItems){
+        return itemService.saveListOfItem(menuItems);
+    }
     @GetMapping
     public List<ItemDto> getAllItem(){
         return itemService.getAllItem();
