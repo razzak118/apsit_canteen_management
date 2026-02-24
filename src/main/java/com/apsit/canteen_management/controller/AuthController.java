@@ -1,12 +1,11 @@
 package com.apsit.canteen_management.controller;
 
-import com.apsit.canteen_management.dto.LoginRequestDto;
-import com.apsit.canteen_management.dto.LoginResponseDto;
-import com.apsit.canteen_management.dto.SignupRequestDto;
-import com.apsit.canteen_management.dto.SignupResponseDto;
+import com.apsit.canteen_management.dto.*;
 import com.apsit.canteen_management.service.AuthService;
+import com.apsit.canteen_management.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
+    private final UserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto){
@@ -23,6 +23,12 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<SignupResponseDto> signup(@RequestBody SignupRequestDto signupRequestDto){ // using LoginRequestDto for now as SignupRequestDto will also have same fields.
         return ResponseEntity.ok(authService.signup(signupRequestDto));
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/change-password")
+    public ResponseEntity<UserResponseDto> changePass(@RequestBody PassChangeRequestDto passChangeRequestDto){
+        return userService.changePass(passChangeRequestDto);
     }
 
 

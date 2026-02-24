@@ -1,5 +1,6 @@
 package com.apsit.canteen_management.service;
 
+import com.apsit.canteen_management.dto.PassChangeRequestDto;
 import com.apsit.canteen_management.dto.UserResponseDto;
 import com.apsit.canteen_management.entity.User;
 import com.apsit.canteen_management.repository.UserRepository;
@@ -7,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +21,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final CloudinaryServiceImpl cloudinaryService;
+    private final PasswordEncoder passwordEncoder;
 
     public ResponseEntity<UserResponseDto> findByUsername(String username){
         return userRepository.findByUsername(username)
@@ -37,5 +40,14 @@ public class UserService {
     public ResponseEntity<UserResponseDto> getUser() {
         User user=(User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return ResponseEntity.ok(modelMapper.map(user,UserResponseDto.class));
+    }
+
+    public ResponseEntity<UserResponseDto> changePass(PassChangeRequestDto passChangeRequestDto){
+        User user=(User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(passwordEncoder.matches(passChangeRequestDto.getOldPassword(), user.getPassword())){
+            user.setPassword(passwordEncoder.encode(passChangeRequestDto.getNewPassword()));
+            return ResponseEntity.ok(modelMapper.map(userRepository.save(user),UserResponseDto.class));
+        }
+        return ResponseEntity.badRequest().build();
     }
 }
