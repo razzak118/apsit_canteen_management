@@ -6,6 +6,7 @@ import com.apsit.canteen_management.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -20,6 +21,13 @@ public class UserController {
     public ResponseEntity<UserResponseDto> findByUsername(@PathVariable String username){
         return userService.findByUsername(username);
     }
-
+    @PostMapping("/updateProfilePic")
+    public ResponseEntity<UserResponseDto> uploadProfilePicture(@ModelAttribute MultipartFile profilePicture ){
+        return userService.uploadProfilePicture(profilePicture);
+    }
+    @GetMapping
+    public ResponseEntity<UserResponseDto> getUser(){
+        return userService.getUser();
+    }
 
 }

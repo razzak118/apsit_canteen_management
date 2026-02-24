@@ -80,6 +80,7 @@ public class CartService {
         return ResponseEntity.ok(modelMapper.map(cartRepository.save(prevCart), CartDto.class));
     }
 
+    @Transactional
     public ResponseEntity<CartDto> removeItemCompletelyFromCart(Long cartItemId) {
         User user= (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Cart prevcart=cartRepository.findById(user.getUserId()).orElseThrow();

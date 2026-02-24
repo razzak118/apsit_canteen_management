@@ -29,6 +29,7 @@ public class User implements UserDetails {
     private Cart cart;
     @Enumerated(EnumType.STRING)
     private Role role;
+    private String profilePictureUrl;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

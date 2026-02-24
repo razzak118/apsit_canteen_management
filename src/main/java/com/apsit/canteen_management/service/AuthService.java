@@ -46,6 +46,7 @@ public class AuthService {
                 .email(signupRequestDto.getUsername() + "@apsit.edu.in")
                 .mobileNumber(signupRequestDto.getMobileNumber())
                 .role(Role.valueOf(signupRequestDto.getRole()))
+                .profilePictureUrl(null)
                 .build();
         Cart cart= new Cart();
         cart.setUser(user);

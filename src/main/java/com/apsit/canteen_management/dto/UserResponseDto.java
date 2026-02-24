@@ -12,4 +12,5 @@ public class UserResponseDto {
     private String username;
     private String mobileNumber;
     private String email;
+    private String profilePictureUrl;
 }
