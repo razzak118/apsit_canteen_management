@@ -37,12 +37,12 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(ExpiredJwtException.class)
     public ResponseEntity<ApiError> expiredJwtExceptionHandler(ExpiredJwtException ex){
-        ApiError apiError=new ApiError("Jwt Expired !", HttpStatus.NON_AUTHORITATIVE_INFORMATION);
+        ApiError apiError=new ApiError("Jwt Expired !", HttpStatus.UNAUTHORIZED);
         return new ResponseEntity<>(apiError, apiError.getHttpStatus());
     }
     @ExceptionHandler(MalformedJwtException.class)
     public ResponseEntity<ApiError> malformedJwtExceptionHandler(MalformedJwtException ex){
-        ApiError apiError=new ApiError("Invalid Jwt: "+ex.getMessage(), HttpStatus.NON_AUTHORITATIVE_INFORMATION);
+        ApiError apiError=new ApiError("Invalid Jwt: "+ex.getMessage(), HttpStatus.UNAUTHORIZED);
         return new ResponseEntity<>(apiError, apiError.getHttpStatus());
     }
     @ExceptionHandler(AuthorizationDeniedException.class)
