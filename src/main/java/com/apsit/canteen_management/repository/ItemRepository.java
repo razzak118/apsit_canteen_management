@@ -15,4 +15,6 @@ public interface ItemRepository extends JpaRepository<MenuItem,Long> {
     Optional<List<MenuItem>> findAllByCategory(ItemCategory category);
 
     Optional<List<MenuItem>> findByPriceBetween(int minPrice, int highPrice);
+
+    Optional<List<MenuItem>> findByReadyInEquals(int readyIn);
 }

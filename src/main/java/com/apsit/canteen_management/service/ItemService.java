@@ -90,4 +90,18 @@ public class ItemService {
                 .stream().map(item-> modelMapper.map(item, ItemDto.class))
                 .toList();
     }
+
+    public ResponseEntity deleteByListOfItemId(List<Long> idList) {
+        idList
+                .forEach(itemRepository::deleteById);
+        return ResponseEntity.ok().build();
+    }
+
+    public ResponseEntity<List<ItemDto>> getInstantReadyItems() {
+        return itemRepository.findByReadyInEquals(0)
+                .map(menuItems -> menuItems.stream()
+                        .map(menuItem -> modelMapper.map(menuItem, ItemDto.class)).toList())
+                .map(ResponseEntity::ok)
+                .orElseGet(()->ResponseEntity.notFound().build());
+    }
 }

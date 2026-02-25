@@ -13,4 +13,5 @@ public class ItemDto {
     private String imageUrl;
     private ItemCategory category;
     private boolean isAvailable;
+    private int readyIn;
 }

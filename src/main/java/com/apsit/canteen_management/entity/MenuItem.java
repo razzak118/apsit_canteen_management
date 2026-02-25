@@ -26,4 +26,5 @@ public class MenuItem {
     private ItemCategory category;
     @Column(nullable = false)
     private boolean isAvailable;
+    private int readyIn;
 }

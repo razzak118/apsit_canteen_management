@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -42,6 +43,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MalformedJwtException.class)
     public ResponseEntity<ApiError> malformedJwtExceptionHandler(MalformedJwtException ex){
         ApiError apiError=new ApiError("Invalid Jwt: "+ex.getMessage(), HttpStatus.NON_AUTHORITATIVE_INFORMATION);
+        return new ResponseEntity<>(apiError, apiError.getHttpStatus());
+    }
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ApiError> AuthorizationDeniedExceptionHandler(AuthorizationDeniedException ex){
+        ApiError apiError=new ApiError("You do not have access to do this!", HttpStatus.FORBIDDEN);
         return new ResponseEntity<>(apiError, apiError.getHttpStatus());
     }
 }

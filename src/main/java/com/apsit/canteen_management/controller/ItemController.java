@@ -4,6 +4,7 @@ import com.apsit.canteen_management.dto.ItemDto;
 import com.apsit.canteen_management.dto.SaveItemDto;
 import com.apsit.canteen_management.entity.MenuItem;
 import com.apsit.canteen_management.enums.ItemCategory;
+import com.apsit.canteen_management.repository.ItemRepository;
 import com.apsit.canteen_management.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -28,6 +29,7 @@ public class ItemController {
     public ResponseEntity<MenuItem> saveItem(@ModelAttribute SaveItemDto saveItemDto) {
         return itemService.saveItem(saveItemDto);
     }
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/save/all")
     public ResponseEntity<List<MenuItem>> saveListOfItem(@RequestBody List<MenuItem> menuItems){
         return itemService.saveListOfItem(menuItems);
@@ -62,6 +64,17 @@ public class ItemController {
     @GetMapping("/price-range")
     public ResponseEntity<List<ItemDto>> findByPriceBetween(@RequestParam int minPrice, @RequestParam int highPrice){
         return itemService.findByPriceBetween(minPrice, highPrice);
+    }
+
+    @GetMapping("/instant-ready")
+    public ResponseEntity<List<ItemDto>> getInstantReadyItems(){
+        return itemService.getInstantReadyItems();
+    }
+
+    @PostMapping("/delete-all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity deleteByListOfItemId(@RequestBody List<Long> idList){
+        return itemService.deleteByListOfItemId(idList);
     }
 
 }
