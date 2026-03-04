@@ -31,5 +31,13 @@ public class AuthController {
         return userService.changePass(passChangeRequestDto);
     }
 
+    @PostMapping("/admin-login")
+    public ResponseEntity<?> adminLogin(@RequestBody LoginRequestDto loginRequestDto){
+        return authService.adminLogin(loginRequestDto);
+    }
+    @PostMapping("/admin/signup")
+    public ResponseEntity<SignupResponseDto> adminSignup(@RequestBody AdminSignupReqDto adminSignupReqDto){
+        return authService.adminSignUp(adminSignupReqDto);
+    }
 
 }

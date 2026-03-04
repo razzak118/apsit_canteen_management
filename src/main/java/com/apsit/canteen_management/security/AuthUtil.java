@@ -1,5 +1,6 @@
 package com.apsit.canteen_management.security;
 
+import com.apsit.canteen_management.entity.Admin;
 import com.apsit.canteen_management.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -24,6 +25,17 @@ public class AuthUtil {
                 .subject(user.getUsername())
                 .claim("userId", user.getUserId().toString())
                 .claim("role", user.getRole())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis()+(1000*60*5)))
+                .signWith(getSecretKey())
+                .compact();
+    }
+
+    public String generateToken(Admin admin){
+        return Jwts.builder()
+                .subject(admin.getUsername())
+                .claim("userId", admin.getAdminId().toString())
+                .claim("role", admin.getRole())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis()+(1000*60*5)))
                 .signWith(getSecretKey())
