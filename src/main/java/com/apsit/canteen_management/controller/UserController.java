@@ -1,5 +1,6 @@
 package com.apsit.canteen_management.controller;
 
+import com.apsit.canteen_management.dto.OrderTicketDto;
 import com.apsit.canteen_management.dto.UserResponseDto;
 import com.apsit.canteen_management.entity.User;
 import com.apsit.canteen_management.service.UserService;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -28,6 +30,11 @@ public class UserController {
     @GetMapping
     public ResponseEntity<UserResponseDto> getUser(){
         return userService.getUser();
+    }
+
+    @GetMapping("/my-orders")
+    public ResponseEntity<List<OrderTicketDto>> myOrders(){
+        return userService.myOrders();
     }
 
 }
