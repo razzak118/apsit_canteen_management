@@ -1,6 +1,7 @@
 package com.apsit.canteen_management.config;
 
 import com.cloudinary.Cloudinary;
+import org.springframework.beans.factory.annotation.Value;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +14,14 @@ import java.util.Map;
 
 @Configuration
 public class AppConfig {
+    @Value("${cloudinary.cloud-name}")
+    private String cloudName;
+
+    @Value("${cloudinary.api-key}")
+    private String apiKey;
+
+    @Value("${cloudinary.api-secret}")
+    private String apiSecret;
     @Bean
     public ModelMapper modelMapper(){
         return new ModelMapper();
@@ -21,9 +30,9 @@ public class AppConfig {
     @Bean
     public Cloudinary cloudinary(){
         return new Cloudinary(Map.of(
-                "cloud_name","dcavi5wqa",
-                "api_key","366449513797218",
-                "api_secret","D8BdrO2KfcCNyD4ZmiMPHmS_160",
+                "cloud_name",cloudName,
+                "api_key",apiKey,
+                "api_secret",apiSecret,
                 "secure", true
         ));
     }
