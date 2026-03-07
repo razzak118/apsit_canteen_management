@@ -14,12 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.client.HttpClientErrorException;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +27,7 @@ public class AuthService {
     private final AuthUtil authUtil;
     private final PasswordEncoder passwordEncoder;
     private final AdminRepository adminRepository;
+    private final RefreshTokenService refreshTokenService;
 
     public LoginResponseDto login(LoginRequestDto loginRequestDto) {
         Authentication authentication=authenticationManager.authenticate(
@@ -37,8 +35,8 @@ public class AuthService {
         );
 
         User user= (User) authentication.getPrincipal();
-        assert user != null; // since user might be null !!!
-        return new LoginResponseDto(authUtil.generateToken(user), user.getUserId());
+        String refreshToken = refreshTokenService.createRefreshToken(user.getUserId());
+        return new LoginResponseDto(authUtil.generateToken(user), refreshToken, user.getUserId());
     }
 
     @Transactional
@@ -63,7 +61,7 @@ public class AuthService {
     public ResponseEntity<?> adminLogin(LoginRequestDto loginRequestDto){
         Admin admin = adminRepository.findByUsername(loginRequestDto.getUsername()).orElseThrow();
         if(passwordEncoder.matches( loginRequestDto.getPassword(),admin.getPassword() )){
-            return ResponseEntity.ok(new LoginResponseDto(authUtil.generateToken(admin),admin.getAdminId()));
+            return ResponseEntity.ok(new LoginResponseDto(authUtil.generateToken(admin), null, admin.getAdminId()));
         }else{
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("invalid username or password");
         }

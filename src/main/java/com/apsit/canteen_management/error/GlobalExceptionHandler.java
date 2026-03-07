@@ -30,6 +30,13 @@ public class GlobalExceptionHandler {
         ApiError apiError = new ApiError("Authentication failed as: "+ex.getMessage(), HttpStatus.UNAUTHORIZED);
         return  new ResponseEntity<>(apiError, apiError.getHttpStatus());
     }
+
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<ApiError> invalidRefreshTokenHandler(InvalidRefreshTokenException ex){
+        ApiError apiError = new ApiError(ex.getMessage(), HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(apiError, apiError.getHttpStatus());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> generalExceptionHandler(Exception ex){
         ApiError apiError=new ApiError("Unexpected error occured: "+ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
