@@ -32,17 +32,22 @@ public class RefreshTokenService {
     public String createRefreshToken(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new InvalidRefreshTokenException("User not found for refresh token generation"));
-        // Delete any existing token for this user so they only have one active at a time
-        refreshTokenRepository.deleteByUser(user);
 
         String rawToken = generateRawRefreshToken();
-        RefreshToken refreshToken = RefreshToken.builder()
-                .user(user)
-                .tokenHash(hashRefreshToken(rawToken))
-                .expiryDate(Instant.now().plusMillis(REFRESH_TOKEN_EXPIRATION_MS))
-                .build();
+        String hashedToken = hashRefreshToken(rawToken);
+        Instant expiry = Instant.now().plusMillis(REFRESH_TOKEN_EXPIRATION_MS);
 
+        // Find the existing token for the user, or create a new empty one if it doesn't exist
+        RefreshToken refreshToken = refreshTokenRepository.findByUser(user)
+                .orElseGet(() -> RefreshToken.builder().user(user).build());
+
+        // Update the values
+        refreshToken.setTokenHash(hashedToken);
+        refreshToken.setExpiryDate(expiry);
+
+        // Save will perform an UPDATE if it already exists, or an INSERT if it's new
         refreshTokenRepository.save(refreshToken);
+
         return rawToken;
     }
     // verify if the access token of jwt refresh is valid or not
