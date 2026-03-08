@@ -27,9 +27,12 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final CartService cartService;
 
+    public User getloggedUser(){
+        return (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
     @Transactional
     public ResponseEntity<OrderTicketDto> placeOrder(){
-        User user =(User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user =getloggedUser();
         Cart cart=cartRepository.findById(user.getUserId()).orElseThrow();
         if(cart.getCartItems()==null || cart.getCartItems().isEmpty()){
             throw new IllegalArgumentException("Can't place order! your cart is empty.\ntry finding something you like!");
@@ -63,7 +66,7 @@ public class OrderService {
         return ResponseEntity.ok(modelMapper.map(orderTicket, OrderTicketDto.class));
     }
     public ResponseEntity<?> reOrder(Long orderId) {
-        User user=(User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user=getloggedUser();
         OrderTicket orderTicket=orderTicketRepository.findById(orderId)
                 .orElseThrow(()->new RuntimeException("No order present with this order id."));
         if(!orderTicket.getUsername().equals(user.getUsername())){
@@ -78,5 +81,19 @@ public class OrderService {
             }
         }
         return ResponseEntity.ok().build();
+    }
+    public ResponseEntity<?> cancelOrder(Long orderId){
+        User user=getloggedUser();
+        OrderTicket orderTicket=orderTicketRepository.findById(orderId)
+                .orElseThrow(()->new RuntimeException("Order doesn't exist anymore"));
+        if(!orderTicket.getUsername().equals(user.getUsername())){
+            throw new RuntimeException("You are not allowed to cancel this order");
+        }
+        if(orderTicket.getOrderStatus()==OrderStatus.PENDING){
+            orderTicket.setOrderStatus(OrderStatus.CANCELLED);
+            return ResponseEntity.ok(orderTicketRepository.save(orderTicket));
+        }
+        ApiError apiError=new ApiError("Order can not be cancelled now",HttpStatus.NOT_ACCEPTABLE);
+        return new ResponseEntity<>(apiError,apiError.getHttpStatus());
     }
 }
