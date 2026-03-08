@@ -26,4 +26,8 @@ public class OrderController {
     public ResponseEntity<?> reOrder(@PathVariable Long orderId){
         return orderService.reOrder(orderId);
     }
+    @PostMapping("/cancel-order/{orderId}")
+    public ResponseEntity<?> cancelOrder(@PathVariable Long orderId){
+        return orderService.cancelOrder(orderId);
+ a    }
 }

@@ -91,7 +91,7 @@ public class OrderService {
         }
         if(orderTicket.getOrderStatus()==OrderStatus.PENDING){
             orderTicket.setOrderStatus(OrderStatus.CANCELLED);
-            return ResponseEntity.ok(orderTicketRepository.save(orderTicket));
+            return ResponseEntity.ok(modelMapper.map(orderTicketRepository.save(orderTicket),OrderTicketDto.class));
         }
         ApiError apiError=new ApiError("Order can not be cancelled now",HttpStatus.NOT_ACCEPTABLE);
         return new ResponseEntity<>(apiError,apiError.getHttpStatus());
