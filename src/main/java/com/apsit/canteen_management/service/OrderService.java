@@ -1,15 +1,15 @@
 package com.apsit.canteen_management.service;
 
 import com.apsit.canteen_management.dto.OrderTicketDto;
-import com.apsit.canteen_management.entity.Cart;
-import com.apsit.canteen_management.entity.OrderItem;
-import com.apsit.canteen_management.entity.OrderTicket;
-import com.apsit.canteen_management.entity.User;
+import com.apsit.canteen_management.entity.*;
 import com.apsit.canteen_management.enums.OrderStatus;
+import com.apsit.canteen_management.error.ApiError;
 import com.apsit.canteen_management.repository.CartRepository;
+import com.apsit.canteen_management.repository.OrderItemRepository;
 import com.apsit.canteen_management.repository.OrderTicketRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -24,6 +24,8 @@ public class OrderService {
     private final OrderTicketRepository orderTicketRepository;
     private final CartRepository cartRepository;
     private final ModelMapper modelMapper;
+    private final OrderItemRepository orderItemRepository;
+    private final CartService cartService;
 
     @Transactional
     public ResponseEntity<OrderTicketDto> placeOrder(){
@@ -54,5 +56,26 @@ public class OrderService {
         cart.setTotalCartPrice(0.0);
         cartRepository.save(cart);
         return ResponseEntity.ok(modelMapper.map(placedOrder, OrderTicketDto.class));
+    }
+    public ResponseEntity<OrderTicketDto> getOrderDetails(Long orderId){
+        OrderTicket orderTicket=orderTicketRepository.findById(orderId)
+                .orElseThrow(()->new RuntimeException("Order doesn't exist"));
+        return ResponseEntity.ok(modelMapper.map(orderTicket, OrderTicketDto.class));
+    }
+    public ResponseEntity<?> reOrder(Long orderId) {
+        User user=(User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        OrderTicket orderTicket=orderTicketRepository.findById(orderId)
+                .orElseThrow(()->new RuntimeException("No order present with this order id."));
+        if(!orderTicket.getUsername().equals(user.getUsername())){
+            throw new RuntimeException("You do not belong to this order!");
+        }
+        List<OrderItem> orderItems=orderItemRepository.findAllByOrderTicket_Id(orderId)
+                .orElseThrow(()->new RuntimeException("No items found for this order. Please create a fresh order manually"));
+        for (OrderItem orderItem : orderItems) {
+            for(int i=0; i<orderItem.getQuantity(); i++){
+                cartService.addItemToCart(orderItem.getMenuItem().getItemId());
+            }
+        }
+        return ResponseEntity.ok().build();
     }
 }
