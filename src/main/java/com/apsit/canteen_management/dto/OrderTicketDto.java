@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class OrderTicketDto {
+    private Long id;
     private String username;
     private List<OrderItemDto> orderItems;
     private double totalAmount;
