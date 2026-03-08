@@ -95,4 +95,11 @@ public class CartService {
         return ResponseEntity.ok(modelMapper.map(cartRepository.save(prevcart), CartDto.class));
 
     }
+    public ResponseEntity<CartDto> clearCart(){
+        User user=(User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Cart cart=cartRepository.findById(user.getUserId()).orElseThrow();
+        cart.getCartItems().clear();
+        cart.setTotalCartPrice(0.0);
+        return ResponseEntity.ok(modelMapper.map(cartRepository.save(cart), CartDto.class));
+    }
 }

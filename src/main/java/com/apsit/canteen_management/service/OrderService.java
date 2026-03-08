@@ -71,6 +71,7 @@ public class OrderService {
         }
         List<OrderItem> orderItems=orderItemRepository.findAllByOrderTicket_Id(orderId)
                 .orElseThrow(()->new RuntimeException("No items found for this order. Please create a fresh order manually"));
+        cartService.clearCart();
         for (OrderItem orderItem : orderItems) {
             for(int i=0; i<orderItem.getQuantity(); i++){
                 cartService.addItemToCart(orderItem.getMenuItem().getItemId());
