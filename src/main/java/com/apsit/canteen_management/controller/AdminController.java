@@ -1,5 +1,6 @@
 package com.apsit.canteen_management.controller;
 
+import com.apsit.canteen_management.dto.OrderClaimRequest;
 import com.apsit.canteen_management.dto.OrderTicketDto;
 import com.apsit.canteen_management.enums.OrderStatus;
 import com.apsit.canteen_management.service.AdminOrderService;
@@ -32,9 +33,9 @@ public class AdminController {
     public ResponseEntity<?> markOrderReady(@PathVariable Long orderId){
         return adminOrderService.markOrderReady(orderId);
     }
-    @PostMapping("/{orderToken}/deliver")
-    public ResponseEntity<?> verifyAndClaimOrder(@PathVariable String orderToken){
-        return adminOrderService.verifyAndClaimOrder(orderToken);
+    @PostMapping("/deliver")
+    public ResponseEntity<?> verifyAndClaimOrder(@RequestBody OrderClaimRequest orderClaimRequest){
+        return adminOrderService.verifyAndClaimOrder(orderClaimRequest.getOrderToken());
     }
     @PostMapping("/{orderId}/reject")
     public ResponseEntity<?> rejectOrder(@PathVariable Long orderId){
