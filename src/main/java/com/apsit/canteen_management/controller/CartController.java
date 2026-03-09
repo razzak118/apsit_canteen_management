@@ -21,9 +21,9 @@ public class CartController {
         return cartService.addItemToCart(itemId);
     }
 
-    @PostMapping("/remove/{itemId}")
-    public ResponseEntity<CartDto> removeItemFromCart(@PathVariable Long itemId){
-        return cartService.removeItemFromCart(itemId);
+    @PostMapping("/qty/update")
+    public ResponseEntity<CartDto> updateQty(@RequestParam Long cartItemId,@RequestParam int change){
+        return cartService.adjustQuantity(cartItemId, change);
     }
 
     @PostMapping("/deleteItemfromCart/{itemId}")
