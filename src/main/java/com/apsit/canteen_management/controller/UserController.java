@@ -34,7 +34,9 @@ public class UserController {
     }
 
     @GetMapping("/my-orders")
-    public ResponseEntity<Page<OrderTicketDto>> myOrders(@RequestParam int pageNo){
+    public ResponseEntity<Page<OrderTicketDto>> myOrders(
+            @RequestParam(required = false, defaultValue = "0") int pageNo
+    ){
         return userService.myOrders(pageNo);
     }
 
