@@ -29,6 +29,7 @@ public class OrderTicket {
     private double totalAmount;
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
+    private String orderToken;
     private LocalDateTime createdAt;
     private LocalDateTime completedAt;
     private LocalDateTime updatedAt;

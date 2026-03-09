@@ -7,6 +7,7 @@ import com.apsit.canteen_management.enums.ItemCategory;
 import com.apsit.canteen_management.repository.ItemRepository;
 import com.apsit.canteen_management.service.ItemService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,8 +36,8 @@ public class ItemController {
         return itemService.saveListOfItem(menuItems);
     }
     @GetMapping
-    public List<ItemDto> getAllItem(){
-        return itemService.getAllItem();
+    public ResponseEntity<Page<ItemDto>> getAllItem(@RequestParam(required = false, defaultValue = "0") int pageNo){
+        return itemService.getAllItem(pageNo);
     }
 
     @DeleteMapping("/delete/{id}")
@@ -50,9 +51,12 @@ public class ItemController {
         return itemService.getItemByItemName(itemName);
     }
 
-    @GetMapping("/category/{categoryName}")
-    public ResponseEntity<List<ItemDto>> getItemsByCategory(@PathVariable ItemCategory categoryName){
-        return itemService.getItemsByCategory(categoryName);
+    @GetMapping("/category")
+    public ResponseEntity<Page<ItemDto>> getItemsByCategory(
+                            @RequestParam ItemCategory categoryName,
+                            @RequestParam(required = false,defaultValue = "0") Integer pageNo
+                        ){
+        return itemService.getItemsByCategory(categoryName,pageNo);
     }
 
     @PatchMapping("/{id}/toggleAvailability")

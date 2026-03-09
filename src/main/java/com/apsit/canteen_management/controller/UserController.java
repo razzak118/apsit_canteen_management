@@ -5,6 +5,7 @@ import com.apsit.canteen_management.dto.UserResponseDto;
 import com.apsit.canteen_management.entity.User;
 import com.apsit.canteen_management.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,8 +34,8 @@ public class UserController {
     }
 
     @GetMapping("/my-orders")
-    public ResponseEntity<List<OrderTicketDto>> myOrders(){
-        return userService.myOrders();
+    public ResponseEntity<Page<OrderTicketDto>> myOrders(@RequestParam int pageNo){
+        return userService.myOrders(pageNo);
     }
 
 }

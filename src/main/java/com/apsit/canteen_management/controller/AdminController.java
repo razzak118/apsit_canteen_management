@@ -1,14 +1,61 @@
 package com.apsit.canteen_management.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.apsit.canteen_management.dto.OrderTicketDto;
+import com.apsit.canteen_management.enums.OrderStatus;
+import com.apsit.canteen_management.service.AdminOrderService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/admin/orders")
+@RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
+    private final AdminOrderService adminOrderService;
     @GetMapping
-    public String healthCheck(){
-        return "It's all good!";
+    public ResponseEntity<Page<OrderTicketDto>> getOrderByOrderStatus(
+                                @RequestParam OrderStatus orderStatus,
+                                @RequestParam(required = false, defaultValue = "0") int pageNo
+                            ){
+        return adminOrderService.getOrderByOrderStatus(orderStatus, pageNo);
     }
+    @PostMapping("/{orderId}/accept")
+    public ResponseEntity<?> acceptPendingOrder(@PathVariable Long orderId){
+        return adminOrderService.acceptPendingOrder(orderId);
+    }
+    @PostMapping("/{orderId}/ready")
+    public ResponseEntity<?> markOrderReady(@PathVariable Long orderId){
+        return adminOrderService.markOrderReady(orderId);
+    }
+    @PostMapping("/{orderToken}/deliver")
+    public ResponseEntity<?> verifyAndClaimOrder(@PathVariable String orderToken){
+        return adminOrderService.verifyAndClaimOrder(orderToken);
+    }
+    @PostMapping("/{orderId}/reject")
+    public ResponseEntity<?> rejectOrder(@PathVariable Long orderId){
+        return adminOrderService.rejectOrder(orderId);
+    }
+
+    //Dashboard APIs
+    //like
+    // pending:35
+    // In-Progress:6
+    // Ready: 4
+    @GetMapping("/count")
+    public long countOrdersByStatus(@RequestParam OrderStatus orderStatus){
+        return adminOrderService.countByOrderStatus(orderStatus);
+    }
+    // delivered today:
+    @GetMapping("/delivered/count")
+    public long countDeleveredOrderToday(){
+        return adminOrderService.countOrdersCompletedToday();
+    }
+
+
+
 }

@@ -6,11 +6,16 @@ import com.apsit.canteen_management.dto.PassChangeRequestDto;
 import com.apsit.canteen_management.dto.UserResponseDto;
 import com.apsit.canteen_management.entity.OrderTicket;
 import com.apsit.canteen_management.entity.User;
+import com.apsit.canteen_management.enums.OrderStatus;
 import com.apsit.canteen_management.repository.OrderTicketRepository;
 import com.apsit.canteen_management.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.query.Order;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -57,14 +62,14 @@ public class UserService {
         }
         return ResponseEntity.badRequest().build();
     }
-    public ResponseEntity<List<OrderTicketDto>> myOrders(){
+    public ResponseEntity<Page<OrderTicketDto>> myOrders(int pageNo){
         User user=(User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<List<OrderTicket>> myOrders=orderTicketRepository.findAllByUsername(user.getUsername());
-        return myOrders
-                .map(orders -> orders.stream()
-                        .map(order -> modelMapper.map(order, OrderTicketDto.class))
-                        .toList())
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.ok(List.of()));
+        return ResponseEntity.ok(orderTicketRepository
+                .findAllByUsername(
+                        user.getUsername(),
+                        PageRequest.of(pageNo,10, Sort.by(Sort.Direction.DESC,"createdAt"))
+                )
+                .map(orderTicket -> modelMapper.map(orderTicket, OrderTicketDto.class))
+        );
     }
 }

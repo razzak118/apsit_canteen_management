@@ -18,6 +18,7 @@ public class OrderTicketDto {
     private List<OrderItemDto> orderItems;
     private double totalAmount;
     private OrderStatus orderStatus;
+    private String orderToken;
     private LocalDateTime createdAt;
     private LocalDateTime completedAt;
     private LocalDateTime updatedAt;

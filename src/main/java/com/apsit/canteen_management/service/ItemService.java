@@ -8,6 +8,10 @@ import com.apsit.canteen_management.repository.ItemRepository;
 import com.cloudinary.Cloudinary;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,13 +62,14 @@ public class ItemService {
                 .orElseGet(()->ResponseEntity.notFound().build());
     }
 
-    public ResponseEntity<List<ItemDto>> getItemsByCategory(ItemCategory itemCategory){
-        return itemRepository.findAllByCategory(itemCategory)
-                .map(items -> items.stream()
-                        .map(menuItem ->modelMapper.map(menuItem, ItemDto.class))
-                        .toList())
-                .map(ResponseEntity:: ok)
-                .orElseGet(()->ResponseEntity.notFound().build());
+    public ResponseEntity<Page<ItemDto>> getItemsByCategory(ItemCategory itemCategory, int pageNo){
+        return ResponseEntity.ok(itemRepository
+                .findAllByCategory(
+                    itemCategory,
+                    PageRequest.of(pageNo,10, Sort.by(Sort.Direction.ASC,"itemName"))
+                )
+                .map(menuItem -> modelMapper.map(menuItem, ItemDto.class))
+        );
     }
 
     public ResponseEntity<ItemDto> toggleAvailability(Long id){
@@ -85,10 +90,13 @@ public class ItemService {
                 .orElseGet(()->ResponseEntity.notFound().build());
     }
 
-    public List<ItemDto> getAllItem() {
-        return itemRepository.findAll()
-                .stream().map(item-> modelMapper.map(item, ItemDto.class))
-                .toList();
+    public ResponseEntity<Page<ItemDto>> getAllItem(int pageNo) {
+        return ResponseEntity.ok(
+                itemRepository.findAll(
+                        PageRequest.of(pageNo,10,Sort.by(Sort.Direction.ASC,"itemName"))
+                )
+                        .map(menuItem -> modelMapper.map(menuItem,ItemDto.class))
+        );
     }
 
     public ResponseEntity deleteByListOfItemId(List<Long> idList) {

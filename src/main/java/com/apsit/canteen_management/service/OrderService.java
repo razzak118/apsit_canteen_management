@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +55,9 @@ public class OrderService {
                             .build()
                 ).toList();
         orderTicket.setOrderItems(orderItems);
+
+        // Write payments logic here
+
         OrderTicket placedOrder= orderTicketRepository.save(orderTicket);
         cart.getCartItems().clear();
         cart.setTotalCartPrice(0.0);
@@ -90,6 +94,9 @@ public class OrderService {
             throw new RuntimeException("You are not allowed to cancel this order");
         }
         if(orderTicket.getOrderStatus()==OrderStatus.PENDING){
+
+            // Write payments logic here
+
             orderTicket.setOrderStatus(OrderStatus.CANCELLED);
             return ResponseEntity.ok(modelMapper.map(orderTicketRepository.save(orderTicket),OrderTicketDto.class));
         }
