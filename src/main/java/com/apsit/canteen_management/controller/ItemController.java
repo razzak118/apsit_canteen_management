@@ -24,26 +24,9 @@ public class ItemController {
 
     private final ItemService itemService;
 
-    @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('ADMIN')")
-    // Instead of using @ModelAttribute we can manually use @RequestParam for each parameter in the request
-    public ResponseEntity<MenuItem> saveItem(@ModelAttribute SaveItemDto saveItemDto) {
-        return itemService.saveItem(saveItemDto);
-    }
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/save/all")
-    public ResponseEntity<List<MenuItem>> saveListOfItem(@RequestBody List<MenuItem> menuItems){
-        return itemService.saveListOfItem(menuItems);
-    }
     @GetMapping
     public ResponseEntity<Page<ItemDto>> getAllItem(@RequestParam(required = false, defaultValue = "0") int pageNo){
         return itemService.getAllItem(pageNo);
-    }
-
-    @DeleteMapping("/delete/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity deleteItemById(@PathVariable Long id){
-        return itemService.deleteItem(id);
     }
 
     @GetMapping("/{itemName}")
@@ -59,12 +42,6 @@ public class ItemController {
         return itemService.getItemsByCategory(categoryName,pageNo);
     }
 
-    @PatchMapping("/{id}/toggleAvailability")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ItemDto> toggleAvailability(@PathVariable Long id){
-        return itemService.toggleAvailability(id);
-    }
-
     @GetMapping("/price-range")
     public ResponseEntity<List<ItemDto>> findByPriceBetween(@RequestParam int minPrice, @RequestParam int highPrice){
         return itemService.findByPriceBetween(minPrice, highPrice);
@@ -73,12 +50,6 @@ public class ItemController {
     @GetMapping("/instant-ready")
     public ResponseEntity<List<ItemDto>> getInstantReadyItems(){
         return itemService.getInstantReadyItems();
-    }
-
-    @PostMapping("/delete-all")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity deleteByListOfItemId(@RequestBody List<Long> idList){
-        return itemService.deleteByListOfItemId(idList);
     }
 
 }

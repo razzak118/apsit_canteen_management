@@ -1,11 +1,16 @@
 package com.apsit.canteen_management.controller;
 
+import com.apsit.canteen_management.dto.ItemDto;
 import com.apsit.canteen_management.dto.OrderClaimRequest;
 import com.apsit.canteen_management.dto.OrderTicketDto;
+import com.apsit.canteen_management.dto.SaveItemDto;
+import com.apsit.canteen_management.entity.MenuItem;
 import com.apsit.canteen_management.enums.OrderStatus;
 import com.apsit.canteen_management.service.AdminOrderService;
+import com.apsit.canteen_management.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +23,33 @@ import java.util.List;
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
     private final AdminOrderService adminOrderService;
+    private final ItemService itemService;
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity deleteItemById(@PathVariable Long id){
+        return itemService.deleteItem(id);
+    }
+
+    @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    // Instead of using @ModelAttribute we can manually use @RequestParam for each parameter in the request
+    public ResponseEntity<MenuItem> saveItem(@ModelAttribute SaveItemDto saveItemDto) {
+        return itemService.saveItem(saveItemDto);
+    }
+
+    @PostMapping("/save/all")
+    public ResponseEntity<List<MenuItem>> saveListOfItem(@RequestBody List<MenuItem> menuItems){
+        return itemService.saveListOfItem(menuItems);
+    }
+
+    @PatchMapping("/{id}/toggleAvailability")
+    public ResponseEntity<ItemDto> toggleAvailability(@PathVariable Long id){
+        return itemService.toggleAvailability(id);
+    }
+
+    @PostMapping("/delete-all")
+    public ResponseEntity deleteByListOfItemId(@RequestBody List<Long> idList){
+        return itemService.deleteByListOfItemId(idList);
+    }
+
     @GetMapping
     public ResponseEntity<Page<OrderTicketDto>> getOrderByOrderStatus(
                                 @RequestParam OrderStatus orderStatus,
