@@ -23,32 +23,6 @@ import java.util.List;
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
     private final AdminOrderService adminOrderService;
-    private final ItemService itemService;
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity deleteItemById(@PathVariable Long id){
-        return itemService.deleteItem(id);
-    }
-
-    @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    // Instead of using @ModelAttribute we can manually use @RequestParam for each parameter in the request
-    public ResponseEntity<MenuItem> saveItem(@ModelAttribute SaveItemDto saveItemDto) {
-        return itemService.saveItem(saveItemDto);
-    }
-
-    @PostMapping("/save/all")
-    public ResponseEntity<List<MenuItem>> saveListOfItem(@RequestBody List<MenuItem> menuItems){
-        return itemService.saveListOfItem(menuItems);
-    }
-
-    @PatchMapping("/{id}/toggleAvailability")
-    public ResponseEntity<ItemDto> toggleAvailability(@PathVariable Long id){
-        return itemService.toggleAvailability(id);
-    }
-
-    @PostMapping("/delete-all")
-    public ResponseEntity deleteByListOfItemId(@RequestBody List<Long> idList){
-        return itemService.deleteByListOfItemId(idList);
-    }
 
     @GetMapping
     public ResponseEntity<Page<OrderTicketDto>> getOrderByOrderStatus(
