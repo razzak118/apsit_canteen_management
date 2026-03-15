@@ -71,6 +71,7 @@ public class AdminOrderService {
         }
         orderTicket.setOrderStatus(OrderStatus.DELIVERED);
         orderTicket.setUpdatedAt(LocalDateTime.now());
+        orderTicket.setCompletedAt(LocalDateTime.now());
         orderTicketRepository.save(orderTicket);
         return ResponseEntity.ok("Claimed Successfully");
     }
