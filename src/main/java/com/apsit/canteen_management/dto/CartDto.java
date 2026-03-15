@@ -14,4 +14,5 @@ public class CartDto {
     private Long cartId;
     private List<CartItemDto> cartItems;
     private Integer totalCartPrice;
+    private int estPrepTime;
 }
