@@ -27,6 +27,7 @@ public class OrderService {
     private final ModelMapper modelMapper;
     private final OrderItemRepository orderItemRepository;
     private final CartService cartService;
+    private final OrderQueueService orderQueueService;
 
     public User getloggedUser(){
         return (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -43,6 +44,7 @@ public class OrderService {
                 .totalAmount(cart.getTotalCartPrice())
                 .createdAt(LocalDateTime.now())
                 .orderStatus(OrderStatus.PENDING)
+                .estPrepTime(cart.getEstPrepTime())
                 .build();
 
         List<OrderItem> orderItems= cart.getCartItems().stream()
@@ -59,6 +61,7 @@ public class OrderService {
         // Write payments logic here
 
         OrderTicket placedOrder= orderTicketRepository.save(orderTicket);
+        orderQueueService.addPendingOrder(placedOrder);
         cart.getCartItems().clear();
         cart.setTotalCartPrice(0.0);
         cartRepository.save(cart);
@@ -98,6 +101,7 @@ public class OrderService {
             // Write payments logic here
 
             orderTicket.setOrderStatus(OrderStatus.CANCELLED);
+            orderQueueService.removePendingOrder(orderTicket.getId());
             return ResponseEntity.ok(modelMapper.map(orderTicketRepository.save(orderTicket),OrderTicketDto.class));
         }
         ApiError apiError=new ApiError("Order can not be cancelled now",HttpStatus.NOT_ACCEPTABLE);

@@ -27,4 +27,8 @@ public class Admin {
     private String email;
     @Enumerated(EnumType.STRING)
     private Role role;
+    @Column(columnDefinition = "int default 1")
+    private int staffCount;
+    @Column(columnDefinition = "boolean default true")
+    private boolean isCanteenOpen;
 }

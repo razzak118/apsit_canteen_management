@@ -24,5 +24,6 @@ public interface OrderTicketRepository extends JpaRepository<OrderTicket, Long> 
             LocalDateTime start,
             LocalDateTime end
     );
+    List<OrderTicket> findAllByOrderStatusOrderByCreatedAtAsc(OrderStatus orderStatus);
 
 }

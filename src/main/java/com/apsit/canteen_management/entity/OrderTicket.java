@@ -34,4 +34,5 @@ public class OrderTicket {
     private LocalDateTime createdAt;
     private LocalDateTime completedAt;
     private LocalDateTime updatedAt;
+    private int estPrepTime;
 }

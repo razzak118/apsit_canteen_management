@@ -23,6 +23,7 @@ import java.util.UUID;
 public class AdminOrderService {
     private final OrderTicketRepository orderTicketRepository;
     private final ModelMapper modelMapper;
+    private final OrderQueueService orderQueueService;
 
     public ResponseEntity<Page<OrderTicketDto>> getOrderByOrderStatus(OrderStatus orderStatus,int pageNo){
         Sort sort=orderStatus==OrderStatus.PENDING
@@ -42,6 +43,8 @@ public class AdminOrderService {
                 .orElseThrow(()->new RuntimeException("order does not exist to accept. Try with another one"));
         if(orderTicket.getOrderStatus()==OrderStatus.PENDING){
             orderTicket.setOrderStatus(OrderStatus.IN_PROGRESS);
+            orderQueueService.removePendingOrder(orderId);
+            orderQueueService.addInProgressOrder(orderTicket);
             orderTicket.setUpdatedAt(LocalDateTime.now());
             return ResponseEntity.ok(modelMapper.map(orderTicketRepository.save(orderTicket),OrderTicketDto.class));
         }
@@ -55,6 +58,7 @@ public class AdminOrderService {
             return ResponseEntity.badRequest().build();
         }
         orderTicket.setOrderStatus(OrderStatus.READY);
+        orderQueueService.removeInProgressOrder(orderId);
         orderTicket.setOrderToken(UUID.randomUUID().toString());
         orderTicket.setUpdatedAt(LocalDateTime.now());
         return ResponseEntity.ok(modelMapper.map(orderTicketRepository.save(orderTicket), OrderTicketDto.class));
@@ -79,6 +83,11 @@ public class AdminOrderService {
     public ResponseEntity<?> rejectOrder(Long orderId){
         OrderTicket orderTicket=orderTicketRepository.findById(orderId)
                 .orElseThrow(()-> new IllegalArgumentException("order does not exist to cancel"));
+        if(orderTicket.getOrderStatus()==OrderStatus.PENDING){
+            orderQueueService.removePendingOrder(orderTicket.getId());
+        }else{
+            orderQueueService.removeInProgressOrder(orderTicket.getId());
+        }
         orderTicket.setOrderStatus(OrderStatus.CANCELLED);
         orderTicket.setUpdatedAt(LocalDateTime.now());
 
