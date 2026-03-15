@@ -1,6 +1,5 @@
 package com.apsit.canteen_management.dto;
 
-import com.apsit.canteen_management.entity.CartItem;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

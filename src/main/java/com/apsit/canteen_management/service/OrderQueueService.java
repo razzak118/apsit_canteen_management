@@ -7,13 +7,11 @@ import com.apsit.canteen_management.record.OrderQueueItem;
 import com.apsit.canteen_management.repository.AdminRepository;
 import com.apsit.canteen_management.repository.OrderTicketRepository;
 import jakarta.annotation.PostConstruct;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 

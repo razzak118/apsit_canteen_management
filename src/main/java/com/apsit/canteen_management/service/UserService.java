@@ -1,20 +1,15 @@
 package com.apsit.canteen_management.service;
 
-import com.apsit.canteen_management.dto.OrderItemDto;
 import com.apsit.canteen_management.dto.OrderTicketDto;
 import com.apsit.canteen_management.dto.PassChangeRequestDto;
 import com.apsit.canteen_management.dto.UserResponseDto;
-import com.apsit.canteen_management.entity.OrderTicket;
 import com.apsit.canteen_management.entity.User;
-import com.apsit.canteen_management.enums.OrderStatus;
 import com.apsit.canteen_management.repository.OrderTicketRepository;
 import com.apsit.canteen_management.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.query.Order;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,9 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

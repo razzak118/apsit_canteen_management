@@ -1,21 +1,14 @@
 package com.apsit.canteen_management.controller;
 
-import com.apsit.canteen_management.dto.ItemDto;
 import com.apsit.canteen_management.dto.OrderClaimRequest;
 import com.apsit.canteen_management.dto.OrderTicketDto;
-import com.apsit.canteen_management.dto.SaveItemDto;
-import com.apsit.canteen_management.entity.MenuItem;
 import com.apsit.canteen_management.enums.OrderStatus;
 import com.apsit.canteen_management.service.AdminOrderService;
-import com.apsit.canteen_management.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/admin/orders")

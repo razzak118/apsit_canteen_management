@@ -1,10 +1,8 @@
 package com.apsit.canteen_management.entity;
 
-import com.apsit.canteen_management.dto.ItemDto;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
