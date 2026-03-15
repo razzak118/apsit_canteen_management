@@ -23,17 +23,23 @@ public class CartService {
     private final CartRepository cartRepository;
     private final ModelMapper modelMapper;
     private final ItemRepository itemRepository;
+    private final OrderQueueService orderQueueService;
 
     private void updateCart(Cart cart){
         double newTotal=cart.getCartItems().stream()
                 .mapToDouble(CartItem::getCartItemPrice)
                 .sum();
-        int newEstPrepTime=cart.getCartItems().stream()
+        int cartPrepTime=cart.getCartItems().stream()
                 .mapToInt(item->item.getMenuItem().getReadyIn()*item.getQuantity())
                 .sum();
         cart.setTotalCartPrice(newTotal);
-        cart.setEstPrepTime(newEstPrepTime);
+        cart.setEstPrepTime(updateCartPrepTime(cartPrepTime));
     }
+
+    private int updateCartPrepTime(int cartPrepTime){
+        return orderQueueService.estWaitTime()+orderQueueService.calculateParallelTime(cartPrepTime) ;
+    }
+
     private User getUser(){
         return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
