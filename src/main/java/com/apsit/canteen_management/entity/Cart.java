@@ -4,6 +4,7 @@ import com.apsit.canteen_management.dto.ItemDto;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -22,6 +23,7 @@ public class Cart {
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItem> cartItems;
     private Double totalCartPrice;
+    private int estPrepTime;
 
     public void addItemToCart(CartItem cartItem){
         cartItems.add(cartItem);

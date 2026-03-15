@@ -13,21 +13,21 @@ public class CartController {
     private final CartService cartService;
     @GetMapping("/my-cart")
     public ResponseEntity<CartDto> getCartById(){
-        return cartService.getCartById();
+        return ResponseEntity.ok(cartService.getCartById());
     }
 
     @PostMapping("/addToCart/{itemId}")
     public ResponseEntity<CartDto> addItemToCart(@PathVariable Long itemId){
-        return cartService.addItemToCart(itemId);
+        return ResponseEntity.ok(cartService.addItemToCart(itemId));
     }
 
     @PostMapping("/qty/update")
     public ResponseEntity<CartDto> updateQty(@RequestParam Long cartItemId,@RequestParam int change){
-        return cartService.adjustQuantity(cartItemId, change);
+        return ResponseEntity.ok(cartService.adjustQuantity(cartItemId, change));
     }
 
     @PostMapping("/deleteItemfromCart/{itemId}")
     public ResponseEntity<CartDto> removeItemCompletelyFromCart(@PathVariable Long itemId){
-        return cartService.removeItemCompletelyFromCart(itemId);
+        return ResponseEntity.ok(cartService.removeItemCompletelyFromCart(itemId));
     }
 }
