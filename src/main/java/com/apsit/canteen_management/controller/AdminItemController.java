@@ -25,12 +25,12 @@ public class AdminItemController {
 
     @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     // Instead of using @ModelAttribute we can manually use @RequestParam for each parameter in the request
-    public ResponseEntity<MenuItem> saveItem(@ModelAttribute SaveItemDto saveItemDto) {
+    public ResponseEntity<ItemDto> saveItem(@ModelAttribute SaveItemDto saveItemDto) {
         return itemService.saveItem(saveItemDto);
     }
 
     @PostMapping("/save/all")
-    public ResponseEntity<List<MenuItem>> saveListOfItem(@RequestBody List<MenuItem> menuItems){
+    public ResponseEntity<List<ItemDto>> saveListOfItem(@RequestBody List<MenuItem> menuItems){
         return itemService.saveListOfItem(menuItems);
     }
 
@@ -39,6 +39,7 @@ public class AdminItemController {
         return itemService.toggleAvailability(id);
     }
 
+    // temporary method for quick testings
     @PostMapping("/delete-all")
     public ResponseEntity deleteByListOfItemId(@RequestBody List<Long> idList){
         return itemService.deleteByListOfItemId(idList);

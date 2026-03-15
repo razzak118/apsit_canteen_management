@@ -17,4 +17,5 @@ public class SaveItemDto {
     private MultipartFile itemImage;
     private ItemCategory category;
     private boolean isAvailable;
+    private int readyIn;
 }

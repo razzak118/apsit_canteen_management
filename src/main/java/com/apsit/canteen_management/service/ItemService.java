@@ -28,23 +28,27 @@ public class ItemService {
     private final CloudinaryServiceImpl cloudinaryService;
 
     @Transactional
-    public ResponseEntity<MenuItem> saveItem(SaveItemDto saveItemDto){
+    public ResponseEntity<ItemDto> saveItem(SaveItemDto saveItemDto){
         MenuItem newMenuItem= MenuItem.builder()
                 .itemName(saveItemDto.getItemName())
                 .price(saveItemDto.getPrice())
                 .category(ItemCategory.valueOf(saveItemDto.getCategory().toString().toUpperCase()))
+                .readyIn(saveItemDto.getReadyIn())
                 .isAvailable(true)
                 .build();
         MultipartFile itemImage=saveItemDto.getItemImage();
         Map uploadInfo= cloudinaryService.upload(itemImage);
         newMenuItem.setImageUrl(uploadInfo.get("url").toString());
-        return ResponseEntity.ok(itemRepository.save(newMenuItem));
+        return ResponseEntity.ok(modelMapper.map(itemRepository.save(newMenuItem),ItemDto.class));
     }
-    public ResponseEntity<List<MenuItem>> saveListOfItem(List<MenuItem> menuItems) {
+    public ResponseEntity<List<ItemDto>> saveListOfItem(List<MenuItem> menuItems) {
         List<MenuItem> menuItemList = menuItems.stream()
                 .map(itemRepository::save)
                 .toList();
-        return ResponseEntity.ok(menuItemList);
+        return ResponseEntity.ok(menuItemList.stream()
+                        .map(menuItem -> modelMapper.map(menuItem, ItemDto.class))
+                        .toList()
+                    );
     }
     public ResponseEntity deleteItem(Long id){
         try{
