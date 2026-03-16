@@ -22,6 +22,10 @@ public class RefreshToken {
     @JoinColumn(name = "user_id", referencedColumnName = "userId")
     private User user;
 
+    @OneToOne
+    @JoinColumn(name="admin_id", referencedColumnName ="adminId")
+    private Admin admin;
+
     @Column(nullable = false)
     private Instant expiryDate;
 }

@@ -35,8 +35,10 @@ public class AuthController {
 
     @PostMapping("/admin-login")
     public ResponseEntity<?> adminLogin(@RequestBody LoginRequestDto loginRequestDto){
-        return authService.adminLogin(loginRequestDto);
+        return ResponseEntity.ok(authService.adminLogin(loginRequestDto));
     }
+
+    //make it later accessible only to super admin
     @PostMapping("/admin/signup")
     public ResponseEntity<SignupResponseDto> adminSignup(@RequestBody AdminSignupReqDto adminSignupReqDto){
         return authService.adminSignUp(adminSignupReqDto);

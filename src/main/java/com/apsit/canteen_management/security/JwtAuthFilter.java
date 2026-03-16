@@ -2,7 +2,9 @@ package com.apsit.canteen_management.security;
 
 // To use make use of jwt token in future after it once get generated while login.
 
+import com.apsit.canteen_management.entity.Admin;
 import com.apsit.canteen_management.entity.User;
+import com.apsit.canteen_management.repository.AdminRepository;
 import com.apsit.canteen_management.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -10,12 +12,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -23,6 +28,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final UserRepository userRepository;
     private final AuthUtil authUtil;
+    private final AdminRepository adminRepository;
 
     private final HandlerExceptionResolver handlerExceptionResolver;
 
@@ -43,10 +49,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
          */
             String username = authUtil.getUsernameFromToken(token);
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                User user = userRepository.findByUsername(username).orElseThrow();
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                        new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                User user = userRepository.findByUsername(username).orElse(null);
+                if (user != null) {
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                } else {
+                    Admin admin = adminRepository.findByUsername(username)
+                            .orElseThrow(() -> new UsernameNotFoundException("No account found for: " + username));
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    admin, null,
+                                    List.of(new SimpleGrantedAuthority("ROLE_" + admin.getRole().name()))
+                            );
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
             filterChain.doFilter(request, response);
         }catch (Exception e){

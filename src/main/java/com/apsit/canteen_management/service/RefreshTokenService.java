@@ -2,9 +2,11 @@ package com.apsit.canteen_management.service;
 
 import com.apsit.canteen_management.dto.RefreshTokenRequestDto;
 import com.apsit.canteen_management.dto.RefreshTokenResponseDto;
+import com.apsit.canteen_management.entity.Admin;
 import com.apsit.canteen_management.entity.User;
 import com.apsit.canteen_management.error.InvalidRefreshTokenException;
 import com.apsit.canteen_management.entity.RefreshToken;
+import com.apsit.canteen_management.repository.AdminRepository;
 import com.apsit.canteen_management.repository.RefreshTokenRepository;
 import com.apsit.canteen_management.repository.UserRepository;
 import com.apsit.canteen_management.security.AuthUtil;
@@ -24,6 +26,7 @@ import java.util.UUID;
 public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository;
+    private final AdminRepository adminRepository;
 
     private final long REFRESH_TOKEN_EXPIRATION_MS = 2592000000L;
     private final AuthUtil authUtil;
@@ -50,6 +53,29 @@ public class RefreshTokenService {
 
         return rawToken;
     }
+
+    @Transactional
+    public String createAdminRefreshToken(Long adminId) {
+        Admin admin=adminRepository.findById(adminId)
+                .orElseThrow(()->new RuntimeException("Admin not present to refresh token"));
+
+        String rawToken=UUID.randomUUID().toString();
+        String hashedToken=hashRefreshToken(rawToken);
+        Instant expiry = Instant.now().plusMillis(REFRESH_TOKEN_EXPIRATION_MS);
+        RefreshToken refreshToken = refreshTokenRepository.findByAdmin(admin)
+                .orElseGet(() -> RefreshToken.builder().admin(admin).build());
+
+        // Update the values
+        refreshToken.setTokenHash(hashedToken);
+        refreshToken.setExpiryDate(expiry);
+
+        // Save will perform an UPDATE if it already exists, or an INSERT if it's new
+        refreshTokenRepository.save(refreshToken);
+
+        return rawToken;
+    }
+
+
     // verify if the access token of jwt refresh is valid or not
     public RefreshToken verifyExpiration(RefreshToken token){
         if(token.getExpiryDate().compareTo(Instant.now())<0){
@@ -77,10 +103,19 @@ public class RefreshTokenService {
         refreshToken.setExpiryDate(Instant.now().plusMillis(REFRESH_TOKEN_EXPIRATION_MS));
         refreshTokenRepository.save(refreshToken);
 
-        User user = refreshToken.getUser();
-        String newJwt = authUtil.generateToken(user);
+        String newJwt;
+        // Check if the token belongs to a User or an Admin
+        if (refreshToken.getUser() != null) {
+            newJwt = authUtil.generateToken(refreshToken.getUser());
+        } else if (refreshToken.getAdmin() != null) {
+            newJwt = authUtil.generateToken(refreshToken.getAdmin());
+        } else {
+            // Failsafe in case a token is somehow orphaned in the database
+            throw new InvalidRefreshTokenException("Token is orphaned (has no user or admin assigned)");
+        }
         return ResponseEntity.ok(new RefreshTokenResponseDto(newJwt, rotatedRawToken));
     }
+
     //generates random raw string
     private String generateRawRefreshToken() {
         return UUID.randomUUID().toString();

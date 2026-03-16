@@ -35,6 +35,7 @@ public class AuthService {
         );
 
         User user= (User) authentication.getPrincipal();
+        assert user != null;
         String refreshToken = refreshTokenService.createRefreshToken(user.getUserId());
         return new LoginResponseDto(authUtil.generateToken(user), refreshToken, user.getUserId());
     }
@@ -58,13 +59,15 @@ public class AuthService {
         return new SignupResponseDto(user.getUserId(), user.getUsername());
     }
 
-    public ResponseEntity<?> adminLogin(LoginRequestDto loginRequestDto){
-        Admin admin = adminRepository.findByUsername(loginRequestDto.getUsername()).orElseThrow();
-        if(passwordEncoder.matches( loginRequestDto.getPassword(),admin.getPassword() )){
-            return ResponseEntity.ok(new LoginResponseDto(authUtil.generateToken(admin), null, admin.getAdminId()));
-        }else{
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("invalid username or password");
-        }
+    public LoginResponseDto adminLogin(LoginRequestDto loginRequestDto){
+        Authentication authentication=authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequestDto.getUsername(), loginRequestDto.getPassword())
+        );
+
+        Admin admin= (Admin) authentication.getPrincipal();
+        assert admin != null;
+        String refreshToken = refreshTokenService.createAdminRefreshToken(admin.getAdminId());
+        return new LoginResponseDto(authUtil.generateToken(admin), refreshToken, admin.getAdminId());
     }
 
     public ResponseEntity<SignupResponseDto> adminSignUp(AdminSignupReqDto adminSignupReqDto){
