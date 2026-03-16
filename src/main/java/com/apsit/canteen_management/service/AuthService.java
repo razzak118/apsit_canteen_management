@@ -34,8 +34,11 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(loginRequestDto.getUsername(), loginRequestDto.getPassword())
         );
 
-        User user= (User) authentication.getPrincipal();
-        assert user != null;
+        Object principal=authentication.getPrincipal();
+        if(!(principal instanceof User)){
+            throw new IllegalArgumentException("Admins must use admin login portal!");
+        }
+        User user=(User) principal;
         String refreshToken = refreshTokenService.createRefreshToken(user.getUserId());
         return new LoginResponseDto(authUtil.generateToken(user), refreshToken, user.getUserId());
     }
@@ -64,8 +67,12 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(loginRequestDto.getUsername(), loginRequestDto.getPassword())
         );
 
-        Admin admin= (Admin) authentication.getPrincipal();
-        assert admin != null;
+        Object principal=authentication.getPrincipal();
+        if(!(principal instanceof Admin)){
+            throw new IllegalArgumentException("Users must use user login portal!");
+        }
+
+        Admin admin=(Admin) principal;
         String refreshToken = refreshTokenService.createAdminRefreshToken(admin.getAdminId());
         return new LoginResponseDto(authUtil.generateToken(admin), refreshToken, admin.getAdminId());
     }

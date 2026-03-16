@@ -4,10 +4,12 @@ import com.apsit.canteen_management.dto.CartDto;
 import com.apsit.canteen_management.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/cart")
+@PreAuthorize("hasRole('STUDENT') or hasRole('STAFF')")
 @RequiredArgsConstructor
 public class CartController {
     private final CartService cartService;
