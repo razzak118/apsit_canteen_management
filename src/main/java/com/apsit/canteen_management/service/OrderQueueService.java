@@ -117,5 +117,4 @@ public class OrderQueueService {
         return (int) Math.ceil((double)linearTime/staffCount);
     }
 
-
 }

@@ -3,9 +3,11 @@ package com.apsit.canteen_management.service;
 import com.apsit.canteen_management.dto.OrderTicketDto;
 import com.apsit.canteen_management.entity.OrderTicket;
 import com.apsit.canteen_management.enums.OrderStatus;
+import com.apsit.canteen_management.event.OrderUpdateEvent;
 import com.apsit.canteen_management.repository.OrderTicketRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -14,9 +16,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -26,6 +26,7 @@ public class AdminOrderService {
     private final ModelMapper modelMapper;
     private final OrderQueueService orderQueueService;
     private final SimpMessagingTemplate simpMessagingTemplate;
+    private final ApplicationEventPublisher eventPublisher;
 
     public ResponseEntity<Page<OrderTicketDto>> getOrderByOrderStatus(OrderStatus orderStatus,int pageNo){
         Sort sort=orderStatus==OrderStatus.PENDING
@@ -52,7 +53,9 @@ public class AdminOrderService {
             OrderTicket savedOrder=orderTicketRepository.save(orderTicket);
             OrderTicketDto dto=modelMapper.map(savedOrder, OrderTicketDto.class);
             // Notify the user
-            sendOrderUpdateNotification(orderTicket.getUsername(), dto);
+            eventPublisher.publishEvent(
+                    new OrderUpdateEvent(orderTicket.getUsername(),dto)
+            );
             return ResponseEntity.ok(dto);
         }
         return ResponseEntity.badRequest().build();
@@ -72,7 +75,9 @@ public class AdminOrderService {
         OrderTicket savedOrder=orderTicketRepository.save(orderTicket);
         OrderTicketDto dto=modelMapper.map(savedOrder, OrderTicketDto.class);
         // Notify the user
-        sendOrderUpdateNotification(orderTicket.getUsername(), dto);
+        eventPublisher.publishEvent(
+                new OrderUpdateEvent(orderTicket.getUsername(),dto)
+        );
         return ResponseEntity.ok(dto);
     }
     @Transactional
@@ -92,14 +97,22 @@ public class AdminOrderService {
         OrderTicket savedOrder=orderTicketRepository.save(orderTicket);
         OrderTicketDto dto=modelMapper.map(savedOrder, OrderTicketDto.class);
         // Notify the user
-        sendOrderUpdateNotification(orderTicket.getUsername(), dto);
+        eventPublisher.publishEvent(
+                new OrderUpdateEvent(orderTicket.getUsername(),dto)
+        );
         return ResponseEntity.ok("Claimed Successfully");
     }
     @Transactional
     public ResponseEntity<?> rejectOrder(Long orderId){
         OrderTicket orderTicket=orderTicketRepository.findById(orderId)
-                .orElseThrow(()-> new IllegalArgumentException("order does not exist to cancel"));
-        if(orderTicket.getOrderStatus()==OrderStatus.PENDING){
+                .orElseThrow(()-> new RuntimeException("order does not exist to cancel"));
+        // first check whether the order is in pending or in-progress status.
+        OrderStatus status=orderTicket.getOrderStatus();
+        if(status!=OrderStatus.PENDING && status!=OrderStatus.IN_PROGRESS){
+            return ResponseEntity.badRequest().body("Only pending or in-progress orders can be cancelled");
+        }
+
+        if(status==OrderStatus.PENDING){
             orderQueueService.removePendingOrder(orderTicket.getId());
         }else{
             orderQueueService.removeInProgressOrder(orderTicket.getId());
@@ -112,7 +125,9 @@ public class AdminOrderService {
         OrderTicket savedOrder=orderTicketRepository.save(orderTicket);
         OrderTicketDto dto=modelMapper.map(savedOrder, OrderTicketDto.class);
         // Notify the user
-        sendOrderUpdateNotification(orderTicket.getUsername(), dto);
+        eventPublisher.publishEvent(
+                new OrderUpdateEvent(orderTicket.getUsername(),dto)
+        );
         return ResponseEntity.ok(dto);
     }
     public long countByOrderStatus(OrderStatus orderStatus){
@@ -125,12 +140,6 @@ public class AdminOrderService {
         );
     }
 
-    public void sendOrderUpdateNotification(String username, OrderTicketDto orderTicketDto){
-        simpMessagingTemplate.convertAndSendToUser(
-                username,
-                "/queue/order-updates",
-                orderTicketDto
-        );
-    }
+
 
 }

@@ -31,7 +31,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("http://localhost:*")
+                .setAllowedOrigins("http://localhost:*","http://127.0.0.1:*")
                 .withSockJS();
     }
 
@@ -51,6 +51,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 StompHeaderAccessor accessor= MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
                 // authenticate when the client first connect
+                assert accessor != null;
                 if(StompCommand.CONNECT.equals(accessor.getCommand())){
                     String authHeader=accessor.getFirstNativeHeader("Authorization");
                     if(authHeader!=null && authHeader.startsWith("Bearer ")){
