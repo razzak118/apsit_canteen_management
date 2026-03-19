@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ public class AdminOrderService {
     private final OrderTicketRepository orderTicketRepository;
     private final ModelMapper modelMapper;
     private final OrderQueueService orderQueueService;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     public ResponseEntity<Page<OrderTicketDto>> getOrderByOrderStatus(OrderStatus orderStatus,int pageNo){
         Sort sort=orderStatus==OrderStatus.PENDING
@@ -46,7 +48,12 @@ public class AdminOrderService {
             orderQueueService.removePendingOrder(orderId);
             orderQueueService.addInProgressOrder(orderTicket);
             orderTicket.setUpdatedAt(LocalDateTime.now());
-            return ResponseEntity.ok(modelMapper.map(orderTicketRepository.save(orderTicket),OrderTicketDto.class));
+
+            OrderTicket savedOrder=orderTicketRepository.save(orderTicket);
+            OrderTicketDto dto=modelMapper.map(savedOrder, OrderTicketDto.class);
+            // Notify the user
+            sendOrderUpdateNotification(orderTicket.getUsername(), dto);
+            return ResponseEntity.ok(dto);
         }
         return ResponseEntity.badRequest().build();
     }
@@ -61,7 +68,12 @@ public class AdminOrderService {
         orderQueueService.removeInProgressOrder(orderId);
         orderTicket.setOrderToken(UUID.randomUUID().toString());
         orderTicket.setUpdatedAt(LocalDateTime.now());
-        return ResponseEntity.ok(modelMapper.map(orderTicketRepository.save(orderTicket), OrderTicketDto.class));
+
+        OrderTicket savedOrder=orderTicketRepository.save(orderTicket);
+        OrderTicketDto dto=modelMapper.map(savedOrder, OrderTicketDto.class);
+        // Notify the user
+        sendOrderUpdateNotification(orderTicket.getUsername(), dto);
+        return ResponseEntity.ok(dto);
     }
     @Transactional
     public ResponseEntity<?> verifyAndClaimOrder(String orderToken){
@@ -76,7 +88,11 @@ public class AdminOrderService {
         orderTicket.setOrderStatus(OrderStatus.DELIVERED);
         orderTicket.setUpdatedAt(LocalDateTime.now());
         orderTicket.setCompletedAt(LocalDateTime.now());
-        orderTicketRepository.save(orderTicket);
+
+        OrderTicket savedOrder=orderTicketRepository.save(orderTicket);
+        OrderTicketDto dto=modelMapper.map(savedOrder, OrderTicketDto.class);
+        // Notify the user
+        sendOrderUpdateNotification(orderTicket.getUsername(), dto);
         return ResponseEntity.ok("Claimed Successfully");
     }
     @Transactional
@@ -93,7 +109,11 @@ public class AdminOrderService {
 
         // Write payments logic here
 
-        return ResponseEntity.ok(orderTicketRepository.save(orderTicket));
+        OrderTicket savedOrder=orderTicketRepository.save(orderTicket);
+        OrderTicketDto dto=modelMapper.map(savedOrder, OrderTicketDto.class);
+        // Notify the user
+        sendOrderUpdateNotification(orderTicket.getUsername(), dto);
+        return ResponseEntity.ok(dto);
     }
     public long countByOrderStatus(OrderStatus orderStatus){
         return orderTicketRepository.countByOrderStatus(orderStatus);
@@ -102,6 +122,14 @@ public class AdminOrderService {
         LocalDateTime now=LocalDateTime.now();
         return orderTicketRepository.countByOrderStatusAndCompletedAtBetween(
                 OrderStatus.DELIVERED,now.toLocalDate().atStartOfDay(),now
+        );
+    }
+
+    public void sendOrderUpdateNotification(String username, OrderTicketDto orderTicketDto){
+        simpMessagingTemplate.convertAndSendToUser(
+                username,
+                "/queue/order-updates",
+                orderTicketDto
         );
     }
 
