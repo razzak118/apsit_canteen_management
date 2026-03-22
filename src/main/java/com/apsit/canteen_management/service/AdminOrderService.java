@@ -100,7 +100,7 @@ public class AdminOrderService {
         eventPublisher.publishEvent(
                 new OrderUpdateEvent(orderTicket.getUsername(),dto)
         );
-        return ResponseEntity.ok("Claimed Successfully");
+        return ResponseEntity.ok(dto.getOrderItems());
     }
     @Transactional
     public ResponseEntity<?> rejectOrder(Long orderId){
