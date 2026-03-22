@@ -25,4 +25,8 @@ public class AdminController {
     public ResponseEntity<?> changePass(@RequestBody PassChangeRequestDto passChangeRequestDto){
         return ResponseEntity.ok(adminService.changePassword(passChangeRequestDto));
     }
+    @PostMapping("/toggle-duty-status")
+    public ResponseEntity<?> toggleCanteenOpenOrClose(){
+        return ResponseEntity.ok(adminService.toggleCanteenOpenOrClose());
+    }
 }

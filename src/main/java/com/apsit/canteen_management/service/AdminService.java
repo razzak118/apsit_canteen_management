@@ -36,4 +36,10 @@ public class AdminService {
         }
         throw new IllegalArgumentException("please enter correct password.");
     }
+    public boolean toggleCanteenOpenOrClose(){
+        Admin admin=getAdmin();
+        admin.setCanteenOpen(!admin.isCanteenOpen());
+        adminRepository.save(admin);
+        return admin.isCanteenOpen();
+    }
 }

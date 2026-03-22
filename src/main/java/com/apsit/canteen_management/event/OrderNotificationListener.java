@@ -13,9 +13,9 @@ public class OrderNotificationListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void sendOrderUpdateNotification(OrderUpdateEvent event){
         messagingTemplate.convertAndSendToUser(
-                event.getUsername(),
+                event.username(),
                 "/queue/order-updates",
-                event.getOrderTicketDto()
+                event.orderTicketDto()
         );
     }
 }
