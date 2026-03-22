@@ -1,61 +1,28 @@
 package com.apsit.canteen_management.controller;
 
-import com.apsit.canteen_management.dto.OrderClaimRequest;
-import com.apsit.canteen_management.dto.OrderTicketDto;
-import com.apsit.canteen_management.enums.OrderStatus;
-import com.apsit.canteen_management.service.AdminOrderService;
+import com.apsit.canteen_management.dto.AdminDto;
+import com.apsit.canteen_management.dto.PassChangeRequestDto;
+import com.apsit.canteen_management.service.AdminService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/admin/orders")
-@RequiredArgsConstructor
+@RequestMapping("/admin/profile")
 @PreAuthorize("hasRole('ADMIN')")
+@RequiredArgsConstructor
 public class AdminController {
-    private final AdminOrderService adminOrderService;
-
-    @GetMapping
-    public ResponseEntity<Page<OrderTicketDto>> getOrderByOrderStatus(
-                                @RequestParam OrderStatus orderStatus,
-                                @RequestParam(required = false, defaultValue = "0") int pageNo
-                            ){
-        return adminOrderService.getOrderByOrderStatus(orderStatus, pageNo);
+    private final AdminService adminService;
+    @PostMapping("/update")
+    public ResponseEntity<AdminDto> updateProfile(@RequestBody AdminDto adminDto){
+        return ResponseEntity.ok(adminService.updateProfile(adminDto));
     }
-    @PostMapping("/{orderId}/accept")
-    public ResponseEntity<?> acceptPendingOrder(@PathVariable Long orderId){
-        return adminOrderService.acceptPendingOrder(orderId);
+    @PostMapping("/change-pass")
+    public ResponseEntity<?> changePass(@RequestBody PassChangeRequestDto passChangeRequestDto){
+        return ResponseEntity.ok(adminService.changePassword(passChangeRequestDto));
     }
-    @PostMapping("/{orderId}/ready")
-    public ResponseEntity<?> markOrderReady(@PathVariable Long orderId){
-        return adminOrderService.markOrderReady(orderId);
-    }
-    @PostMapping("/deliver")
-    public ResponseEntity<?> verifyAndClaimOrder(@RequestBody OrderClaimRequest orderClaimRequest){
-        return adminOrderService.verifyAndClaimOrder(orderClaimRequest.getOrderToken());
-    }
-    @PostMapping("/{orderId}/reject")
-    public ResponseEntity<?> rejectOrder(@PathVariable Long orderId){
-        return adminOrderService.rejectOrder(orderId);
-    }
-
-    //Dashboard APIs
-    //like
-    // pending:35
-    // In-Progress:6
-    // Ready: 4
-    @GetMapping("/count")
-    public long countOrdersByStatus(@RequestParam OrderStatus orderStatus){
-        return adminOrderService.countByOrderStatus(orderStatus);
-    }
-    // delivered today:
-    @GetMapping("/delivered/count")
-    public long countDeleveredOrderToday(){
-        return adminOrderService.countOrdersCompletedToday();
-    }
-
-
-
 }
