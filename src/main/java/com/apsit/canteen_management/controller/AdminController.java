@@ -6,10 +6,7 @@ import com.apsit.canteen_management.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/admin/profile")
@@ -28,5 +25,9 @@ public class AdminController {
     @PostMapping("/toggle-duty-status")
     public ResponseEntity<?> toggleCanteenOpenOrClose(){
         return ResponseEntity.ok(adminService.toggleCanteenOpenOrClose());
+    }
+    @GetMapping("/is-canteen-open")
+    public ResponseEntity<Boolean> isCanteenOpen(){
+        return ResponseEntity.ok(adminService.isCanteenOpen());
     }
 }

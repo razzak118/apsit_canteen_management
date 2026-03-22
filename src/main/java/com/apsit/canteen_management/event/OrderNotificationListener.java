@@ -18,4 +18,11 @@ public class OrderNotificationListener {
                 event.orderTicketDto()
         );
     }
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void sendOrderPlacedNotification(OrderPlaceEvent event){
+        messagingTemplate.convertAndSend(
+                "/topic/admin/order",
+                event.orderTicketDto()
+        );
+    }
 }

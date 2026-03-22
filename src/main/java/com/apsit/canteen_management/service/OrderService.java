@@ -4,11 +4,13 @@ import com.apsit.canteen_management.dto.OrderTicketDto;
 import com.apsit.canteen_management.entity.*;
 import com.apsit.canteen_management.enums.OrderStatus;
 import com.apsit.canteen_management.error.ApiError;
+import com.apsit.canteen_management.event.OrderPlaceEvent;
 import com.apsit.canteen_management.repository.CartRepository;
 import com.apsit.canteen_management.repository.OrderItemRepository;
 import com.apsit.canteen_management.repository.OrderTicketRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,6 +30,7 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final CartService cartService;
     private final OrderQueueService orderQueueService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public User getloggedUser(){
         return (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -65,7 +68,11 @@ public class OrderService {
         cart.getCartItems().clear();
         cart.setTotalCartPrice(0.0);
         cartRepository.save(cart);
-        return ResponseEntity.ok(modelMapper.map(placedOrder, OrderTicketDto.class));
+        OrderTicketDto dto=modelMapper.map(placedOrder, OrderTicketDto.class);
+        eventPublisher.publishEvent(
+                new OrderPlaceEvent(dto)
+        );
+        return ResponseEntity.ok(dto);
     }
     public ResponseEntity<OrderTicketDto> getOrderDetails(Long orderId){
         OrderTicket orderTicket=orderTicketRepository.findById(orderId)
@@ -89,6 +96,7 @@ public class OrderService {
         }
         return ResponseEntity.ok().build();
     }
+    @Transactional
     public ResponseEntity<?> cancelOrder(Long orderId){
         User user=getloggedUser();
         OrderTicket orderTicket=orderTicketRepository.findById(orderId)
@@ -102,7 +110,11 @@ public class OrderService {
 
             orderTicket.setOrderStatus(OrderStatus.CANCELLED);
             orderQueueService.removePendingOrder(orderTicket.getId());
-            return ResponseEntity.ok(modelMapper.map(orderTicketRepository.save(orderTicket),OrderTicketDto.class));
+            OrderTicketDto dto=modelMapper.map(orderTicketRepository.save(orderTicket),OrderTicketDto.class);
+            eventPublisher.publishEvent(
+                    new OrderPlaceEvent(dto)
+            );
+            return ResponseEntity.ok(dto);
         }
         ApiError apiError=new ApiError("Order can not be cancelled now",HttpStatus.NOT_ACCEPTABLE);
         return new ResponseEntity<>(apiError,apiError.getHttpStatus());

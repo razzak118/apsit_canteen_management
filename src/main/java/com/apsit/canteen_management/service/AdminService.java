@@ -42,4 +42,8 @@ public class AdminService {
         adminRepository.save(admin);
         return admin.isCanteenOpen();
     }
+    public boolean isCanteenOpen(){
+        Admin admin=getAdmin();
+        return admin.isCanteenOpen();
+    }
 }
