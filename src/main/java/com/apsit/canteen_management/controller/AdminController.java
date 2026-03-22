@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AdminController {
     private final AdminService adminService;
+    @GetMapping
+    public ResponseEntity<AdminDto> getProfile(){
+        return ResponseEntity.ok(adminService.getProfile());
+    }
     @PostMapping("/update")
     public ResponseEntity<AdminDto> updateProfile(@RequestBody AdminDto adminDto){
         return ResponseEntity.ok(adminService.updateProfile(adminDto));

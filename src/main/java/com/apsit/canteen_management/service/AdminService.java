@@ -21,6 +21,10 @@ public class AdminService {
         return (Admin) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
+    public AdminDto getProfile(){
+        return modelMapper.map(getAdmin(),AdminDto.class);
+    }
+
     public AdminDto updateProfile(AdminDto adminDto){
         Admin admin=getAdmin();
         admin.setUsername(adminDto.getUsername());
