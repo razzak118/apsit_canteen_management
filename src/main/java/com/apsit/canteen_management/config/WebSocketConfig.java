@@ -1,10 +1,9 @@
 package com.apsit.canteen_management.config;
 
-import com.apsit.canteen_management.repository.AdminRepository;
-import com.apsit.canteen_management.repository.UserRepository;
 import com.apsit.canteen_management.security.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -14,6 +13,8 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
@@ -41,12 +42,21 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/topic","/queue")
-                .setHeartbeatValue(new long[]{10000, 10000}); // heartbeat sends every 10 secs, expects every 10 secs.
+                .setHeartbeatValue(new long[]{10000, 10000})
+                .setTaskScheduler(heartBeatScheduler()); // heartbeat sends every 10 secs, expects every 10 secs.
         // if client doesn't response back with "pong" the SessionDisconnectEvent takes place. we can use that event for operations we want to perform.
         config.setApplicationDestinationPrefixes("/app");
         config.setUserDestinationPrefix("/user");
     }
 
+    @Bean
+    public TaskScheduler heartBeatScheduler(){
+        ThreadPoolTaskScheduler scheduler=new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(1);
+        scheduler.setThreadNamePrefix("wss-heartbeat-");
+        scheduler.initialize();
+        return scheduler;
+    }
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(new ChannelInterceptor() {
