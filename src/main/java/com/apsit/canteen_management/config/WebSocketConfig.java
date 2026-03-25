@@ -1,5 +1,7 @@
 package com.apsit.canteen_management.config;
 
+import com.apsit.canteen_management.repository.AdminRepository;
+import com.apsit.canteen_management.repository.UserRepository;
 import com.apsit.canteen_management.security.AuthUtil;
 import org.jspecify.annotations.Nullable;
 import org.springframework.context.annotation.Configuration;
@@ -11,34 +13,42 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
-import java.security.Principal;
+import java.util.List;
 
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final AuthUtil authUtil;
+    private final UserRepository userRepository;
+    private final AdminRepository adminRepository;
 
-    public WebSocketConfig(AuthUtil authUtil) {
+    public WebSocketConfig(AuthUtil authUtil, UserRepository userRepository, AdminRepository adminRepository) {
         this.authUtil = authUtil;
+        this.userRepository = userRepository;
+        this.adminRepository = adminRepository;
     }
 
     // method to build a web socket connection. HANDSHAKE
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("http://localhost:*","http://127.0.0.1:*")
+                .setAllowedOrigins("http://localhost:*","http://127.0.0.1:*","https://apsit-canteen-admin-ui.vercel.app")
                 .withSockJS();
     }
 
     // to configure the channels like /topic/order is the broadcast channel & /app for messages set from client to server.
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic","/queue");
+        config.enableSimpleBroker("/topic","/queue")
+                .setHeartbeatValue(new long[]{10000, 10000}); // heartbeat sends every 10 secs, expects every 10 secs.
+        // if client doesn't response back with "pong" the SessionDisconnectEvent takes place. we can use that event for operations we want to perform.
         config.setApplicationDestinationPrefixes("/app");
         config.setUserDestinationPrefix("/user");
     }
@@ -58,9 +68,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         String jwtToken=authHeader.split("Bearer ")[1];
                         String username= authUtil.getUsernameFromToken(jwtToken);
                         if(username!=null){
-                            // Set the principal so Spring knows who this WebSocket session belongs to
-                            Principal principal=()->username; // short from to call getName function of the Principal class.
-                            accessor.setUser(principal);
+                            List<GrantedAuthority> authorities=authUtil.getAuthoritiesFromToken(jwtToken);
+                            UsernamePasswordAuthenticationToken authenticationToken=
+                                    new UsernamePasswordAuthenticationToken(username,null, authorities);
+                            accessor.setUser(authenticationToken);
                         }
                     }
                 }

@@ -32,7 +32,7 @@ public class UserController {
     }
     @GetMapping
     public ResponseEntity<UserResponseDto> getUser(){
-        return userService.getUser();
+        return userService.getUserDto();
     }
 
     @GetMapping("/my-orders")

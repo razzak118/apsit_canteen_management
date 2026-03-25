@@ -28,6 +28,10 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final OrderTicketRepository orderTicketRepository;
 
+    public User getUser(){
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
     public ResponseEntity<UserResponseDto> findByUsername(String username){
         return userRepository.findByUsername(username)
                 .map(user-> modelMapper.map(user, UserResponseDto.class))
@@ -36,19 +40,18 @@ public class UserService {
     }
 
     public ResponseEntity<UserResponseDto> uploadProfilePicture(MultipartFile profilePicture) {
-        User user=(User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user=getUser();
         Map info=cloudinaryService.upload(profilePicture);
         user.setProfilePictureUrl(info.get("url").toString());
         return ResponseEntity.ok(modelMapper.map(userRepository.save(user),UserResponseDto.class));
     }
 
-    public ResponseEntity<UserResponseDto> getUser() {
-        User user=(User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return ResponseEntity.ok(modelMapper.map(user,UserResponseDto.class));
+    public ResponseEntity<UserResponseDto> getUserDto() {
+        return ResponseEntity.ok(modelMapper.map(getUser(),UserResponseDto.class));
     }
 
     public ResponseEntity<UserResponseDto> changePass(PassChangeRequestDto passChangeRequestDto){
-        User user=(User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user=getUser();
         if(passwordEncoder.matches(passChangeRequestDto.getOldPassword(), user.getPassword())){
             user.setPassword(passwordEncoder.encode(passChangeRequestDto.getNewPassword()));
             return ResponseEntity.ok(modelMapper.map(userRepository.save(user),UserResponseDto.class));
@@ -56,7 +59,7 @@ public class UserService {
         return ResponseEntity.badRequest().build();
     }
     public ResponseEntity<Page<OrderTicketDto>> myOrders(int pageNo){
-        User user=(User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user=getUser();
         return ResponseEntity.ok(orderTicketRepository
                 .findAllByUsername(
                         user.getUsername(),
