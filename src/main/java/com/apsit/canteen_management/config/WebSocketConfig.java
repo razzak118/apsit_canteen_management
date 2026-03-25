@@ -84,7 +84,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     }
                 }else if(StompCommand.SEND.equals(accessor.getCommand()) || StompCommand.SUBSCRIBE.equals(accessor.getCommand())){
                     Long expiresAt= (Long) accessor.getSessionAttributes().get("jwt-expires-at");
-                    if(expiresAt!=null || System.currentTimeMillis()>expiresAt){
+                    if(expiresAt!=null && System.currentTimeMillis()>expiresAt){
                         try {
                             throw new AccessDeniedException("web socket token expired. Please reconnect!");
                         } catch (AccessDeniedException e) {
