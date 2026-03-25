@@ -21,6 +21,8 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+import java.nio.file.AccessDeniedException;
+import java.util.Date;
 import java.util.List;
 
 @Configuration
@@ -76,6 +78,17 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                             UsernamePasswordAuthenticationToken authenticationToken=
                                     new UsernamePasswordAuthenticationToken(username,null, authorities);
                             accessor.setUser(authenticationToken);
+                            Date expiresAt= authUtil.getExpireAtFromToken(jwtToken);
+                            accessor.getSessionAttributes().put("jwt-expires-at",expiresAt.getTime());
+                        }
+                    }
+                }else if(StompCommand.SEND.equals(accessor.getCommand()) || StompCommand.SUBSCRIBE.equals(accessor.getCommand())){
+                    Long expiresAt= (Long) accessor.getSessionAttributes().get("jwt-expires-at");
+                    if(expiresAt!=null || System.currentTimeMillis()>expiresAt){
+                        try {
+                            throw new AccessDeniedException("web socket token expired. Please reconnect!");
+                        } catch (AccessDeniedException e) {
+                            throw new RuntimeException(e);
                         }
                     }
                 }

@@ -69,4 +69,8 @@ public class AuthUtil {
     public List<GrantedAuthority> getAuthoritiesFromToken(String token){
         return List.of(new SimpleGrantedAuthority("ROLE_"+extractRole(token)));
     }
+
+    public Date getExpireAtFromToken(String token){
+        return extractClaim(token, Claims::getExpiration);
+    }
 }
