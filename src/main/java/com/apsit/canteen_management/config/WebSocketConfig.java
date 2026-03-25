@@ -3,6 +3,7 @@ package com.apsit.canteen_management.config;
 import com.apsit.canteen_management.repository.AdminRepository;
 import com.apsit.canteen_management.repository.UserRepository;
 import com.apsit.canteen_management.security.AuthUtil;
+import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
@@ -22,18 +23,11 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 import java.util.List;
 
 @Configuration
+@RequiredArgsConstructor
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final AuthUtil authUtil;
-    private final UserRepository userRepository;
-    private final AdminRepository adminRepository;
-
-    public WebSocketConfig(AuthUtil authUtil, UserRepository userRepository, AdminRepository adminRepository) {
-        this.authUtil = authUtil;
-        this.userRepository = userRepository;
-        this.adminRepository = adminRepository;
-    }
 
     // method to build a web socket connection. HANDSHAKE
     @Override
